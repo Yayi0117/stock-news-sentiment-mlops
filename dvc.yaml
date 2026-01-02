@@ -1,0 +1,18 @@
+stages:
+  data:
+    cmd: >-
+      python src/sns_mlops/data.py
+      --dataset-name NOSIBLE/financial-sentiment
+      --output-root data/processed
+      --seed 42
+      --test-size 0.1
+      --val-size 0.1
+      --small-size 2000
+      --dev-size 10000
+    deps:
+      - src/sns_mlops/data.py
+      - requirements.txt
+    outs:
+      - data/processed/small
+      - data/processed/dev
+      - data/processed/full

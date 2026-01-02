@@ -161,7 +161,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 4 fill here ---
+We manage dependencies using a Conda environment defined in `environment.yml` (named `py312`). The environment pins Python 3.12 and installs all Python packages via pip from `requirements.txt` (runtime dependencies) and `requirements_dev.txt` (development tools such as pytest, ruff, mkdocs, and dvc). To recreate the exact environment on a new machine, a team member can run `conda env create -f environment.yml`, then `conda activate py312`, and finally `pip install -e .` to install the project package in editable mode. We keep strict version pins in the requirements files to make installs deterministic across machines and over time.
 
 ### Question 5
 
@@ -256,7 +256,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 10 fill here ---
+Yes. We use DVC to manage the reproducibility of our data preprocessing pipeline. After initializing DVC with `dvc init`, we define a `data` stage in `dvc.yaml` that runs `python src/sns_mlops/data.py ...` and declares `data/processed/small`, `data/processed/dev`, and `data/processed/full` as stage outputs. Running `dvc repro data` regenerates the processed datasets and produces a `dvc.lock` file, which records the exact command, code dependencies, and hashes of the outputs. This setup makes it easy to reproduce the same processed data artifacts from code, and it keeps large generated files out of Git history while still being tracked by DVC.
 
 ### Question 11
 
@@ -292,7 +292,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 12 fill here ---
+We currently expose a CLI for running the data preprocessing step. For example: `python src/sns_mlops/data.py --output-root data/processed --seed 42 --small-size 2000 --dev-size 10000`. The same step can also be executed through DVC with `dvc repro data`, which uses the parameters recorded in `dvc.yaml`. The CLI supports flags for dataset source, split ratios, and dataset tier sizes to support local development and CI.
 
 ### Question 13
 
@@ -307,7 +307,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 13 fill here ---
+We ensure reproducibility at multiple levels. First, we pin Python and package versions via `environment.yml`, `requirements.txt`, and `requirements_dev.txt`. Second, the data pipeline performs explicit schema validation and uses a fixed random seed to make subsampling and train/val/test splits deterministic. Each processed dataset tier is saved to Parquet and includes a `metadata.json` sidecar with the dataset source, seed, schema, label mapping, and the `pyarrow` version used for materialization. Third, DVC records the preprocessing command, code dependencies, and output hashes in `dvc.lock`, so the exact same artifacts can be regenerated with `dvc repro data`. When needed, we can additionally pin a specific Hugging Face dataset revision to prevent upstream dataset changes from affecting results.
 
 ### Question 14
 
