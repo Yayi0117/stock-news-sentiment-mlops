@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import shutil
 import subprocess
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_PROCESSED_ROOT: Final[Path] = Path("data/processed")
 DEFAULT_OUTPUT_DIR: Final[Path] = Path("models/finbert")
+DEFAULT_MODEL_SUBDIR: Final[str] = "model"
 TEXT_COLUMN: Final[str] = "text"
 LABEL_COLUMN: Final[str] = "label"
 LABEL_TEXT_COLUMN: Final[str] = "label_text"
@@ -40,6 +42,8 @@ class RunConfig:
     output_dir: str
     seed: int
     max_length: int
+    save_model: bool
+    save_checkpoints: bool
     training_args: dict[str, Any]
     data_metadata: dict[str, Any] | None
     versions: dict[str, str]
@@ -145,14 +149,19 @@ def train(
     max_test_samples: int | None,
     save_total_limit: int,
     overwrite_output_dir: bool,
+    save_model: bool,
+    save_checkpoints: bool,
 ) -> None:
     """Fine-tune a FinBERT model using the Hugging Face Trainer API."""
     run_output_dir = output_dir / tier
+    if overwrite_output_dir and run_output_dir.exists():
+        shutil.rmtree(run_output_dir)
     _setup_logging(run_output_dir)
 
     logger.info("Starting training run")
     logger.info("tier=%s processed_root=%s output_dir=%s", tier, processed_root, run_output_dir)
     logger.info("model=%s revision=%s", model_name, model_revision)
+    logger.info("save_model=%s save_checkpoints=%s overwrite_output_dir=%s", save_model, save_checkpoints, overwrite_output_dir)
 
     set_seed(seed)
 
@@ -168,6 +177,9 @@ def train(
     tokenized_splits = _prepare_tokenized_splits(raw_splits, tokenizer=tokenizer, max_length=max_length)
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
+    save_strategy = "epoch" if save_checkpoints else "no"
+    load_best_model_at_end = save_checkpoints
+
     args = TrainingArguments(
         output_dir=str(run_output_dir),
         overwrite_output_dir=overwrite_output_dir,
@@ -178,9 +190,9 @@ def train(
         per_device_train_batch_size=per_device_train_batch_size,
         per_device_eval_batch_size=per_device_eval_batch_size,
         eval_strategy="epoch",
-        save_strategy="epoch",
+        save_strategy=save_strategy,
         save_total_limit=save_total_limit,
-        load_best_model_at_end=True,
+        load_best_model_at_end=load_best_model_at_end,
         metric_for_best_model="f1_macro",
         greater_is_better=True,
         logging_strategy="steps",
@@ -198,6 +210,8 @@ def train(
         output_dir=str(run_output_dir),
         seed=seed,
         max_length=max_length,
+        save_model=save_model,
+        save_checkpoints=save_checkpoints,
         training_args=args.to_dict(),
         data_metadata=data_metadata,
         versions={
@@ -220,7 +234,10 @@ def train(
     )
 
     train_result = trainer.train()
-    trainer.save_model()
+    if save_model:
+        model_dir = run_output_dir / DEFAULT_MODEL_SUBDIR
+        trainer.save_model(str(model_dir))
+        tokenizer.save_pretrained(str(model_dir))
 
     eval_metrics = trainer.evaluate()
     test_output = trainer.predict(tokenized_splits[TEST_SPLIT])
@@ -257,6 +274,8 @@ def main() -> None:
     parser.add_argument("--max-test-samples", type=int, default=None)
     parser.add_argument("--save-total-limit", type=int, default=1)
     parser.add_argument("--overwrite-output-dir", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--save-model", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--save-checkpoints", action=argparse.BooleanOptionalAction, default=False)
 
     args = parser.parse_args()
     train(
@@ -277,6 +296,8 @@ def main() -> None:
         max_test_samples=args.max_test_samples,
         save_total_limit=args.save_total_limit,
         overwrite_output_dir=args.overwrite_output_dir,
+        save_model=args.save_model,
+        save_checkpoints=args.save_checkpoints,
     )
 
 

@@ -178,7 +178,14 @@ cython_debug/
 
 # Data
 /data
+
+# Trained model artifacts (large files; tracked via DVC when needed)
+models/**/checkpoint-*/
+models/**/pytorch_model.bin
+models/**/model.safetensors
+models/**/model/
 /course
 projects.md
 AGENTS.md
-/models
+models/**
+!models/.gitkeep

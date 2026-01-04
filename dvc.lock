@@ -16,16 +16,53 @@ stages:
     outs:
     - path: data/processed/dev
       hash: md5
-      md5: 36263504a5dc5befac7507f56fe1ed1f.dir
+      md5: 5e0420b681c40d22edd62d8c1f74d346.dir
       size: 3903049
       nfiles: 4
     - path: data/processed/full
       hash: md5
-      md5: 8f172329a669b53217d2f273ed498338.dir
+      md5: c595cd9e79cbd5e77f7aeec5d4eb5bc9.dir
       size: 38553820
       nfiles: 4
     - path: data/processed/small
       hash: md5
-      md5: 5bb297b40d20b3e191c3945e19d9d0df.dir
+      md5: ab0df552cabba93c238aad2161f41af8.dir
       size: 787566
       nfiles: 4
+  train:
+    cmd: python -m sns_mlops.train --tier small --processed-root data/processed 
+      --output-dir models/finbert --seed 42 --num-train-epochs 1 --max-length 64
+      --per-device-train-batch-size 4 --per-device-eval-batch-size 8 
+      --max-train-samples 64 --max-eval-samples 64 --max-test-samples 64 
+      --save-total-limit 1 --save-model --no-save-checkpoints
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 9b97913b2854329a7ab1a8bb5aeeaf14.dir
+      size: 43244435
+      nfiles: 12
+    - path: requirements.txt
+      hash: md5
+      md5: 0bf0a7e1390d5229a59fb38c31bec354
+      size: 153
+    - path: src/sns_mlops/model.py
+      hash: md5
+      md5: 21f36daf5ee6ef7b390830b559ff6a5f
+      size: 3414
+    - path: src/sns_mlops/train.py
+      hash: md5
+      md5: 4d8711c6bfe6e44b91fdbaa43f1527c2
+      size: 11182
+    outs:
+    - path: models/finbert/small/metrics.json
+      hash: md5
+      md5: 8fc44e4adc8f9cc960139069293aa1db
+      size: 711
+    - path: models/finbert/small/run_config.json
+      hash: md5
+      md5: c825044b7ec32f87d6a11d5f05741b4c
+      size: 7165
+    - path: models/finbert/small/train.log
+      hash: md5
+      md5: 377f7361e7282d5b4985e65971d2acc5
+      size: 473
