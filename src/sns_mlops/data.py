@@ -10,6 +10,7 @@ from typing import Any, Final
 
 import pyarrow
 import typer
+import datasets as hf_datasets
 from datasets import ClassLabel
 from datasets import Dataset as HFDataset
 from datasets import DatasetDict, load_dataset
@@ -17,12 +18,15 @@ from datasets import DatasetDict, load_dataset
 logger = logging.getLogger(__name__)
 
 DEFAULT_DATASET_NAME: Final[str] = "NOSIBLE/financial-sentiment"
+DEFAULT_RAW_ROOT: Final[Path] = Path("data/raw")
 DEFAULT_TEXT_COLUMN: Final[str] = "text"
 DEFAULT_LABEL_COLUMN: Final[str] = "label"
 DEFAULT_DROP_COLUMNS: Final[tuple[str, ...]] = ("netloc", "url")
 DEFAULT_LABEL2ID: Final[dict[str, int]] = {"negative": 0, "neutral": 1, "positive": 2}
 DEFAULT_ID2LABEL: Final[dict[int, str]] = {v: k for k, v in DEFAULT_LABEL2ID.items()}
 PYARROW_VERSION: Final[str] = pyarrow.__version__
+RAW_TRAIN_FILENAME: Final[str] = "train.parquet"
+RAW_METADATA_FILENAME: Final[str] = "metadata.json"
 
 
 @dataclass(frozen=True)
@@ -217,11 +221,104 @@ def _dataset_fingerprint(dataset: HFDataset) -> str | None:
     return None
 
 
+def _raw_metadata_matches(meta: dict[str, Any], *, dataset_name: str, revision: str | None) -> bool:
+    if meta.get("dataset_name") != dataset_name:
+        return False
+    if meta.get("revision") != revision:
+        return False
+    return True
+
+
+def _load_local_raw_train(raw_root: Path) -> tuple[HFDataset, dict[str, Any]]:
+    meta_path = raw_root / RAW_METADATA_FILENAME
+    train_path = raw_root / RAW_TRAIN_FILENAME
+
+    metadata = json.loads(meta_path.read_text(encoding="utf-8"))
+    ds = load_dataset("parquet", data_files={"train": str(train_path)})
+    if not isinstance(ds, DatasetDict):
+        raise TypeError(f"Expected DatasetDict from parquet loader, got {type(ds)!r}")
+    return ds["train"], metadata
+
+
+def _write_local_raw_train(
+    raw_train: HFDataset,
+    *,
+    raw_root: Path,
+    dataset_name: str,
+    revision: str | None,
+    raw_schema: RawSchema,
+) -> dict[str, Any]:
+    raw_root.mkdir(parents=True, exist_ok=True)
+    train_path = raw_root / RAW_TRAIN_FILENAME
+    meta_path = raw_root / RAW_METADATA_FILENAME
+
+    raw_train.to_parquet(str(train_path))
+
+    metadata: dict[str, Any] = {
+        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "dataset_name": dataset_name,
+        "revision": revision,
+        "num_rows": len(raw_train),
+        "columns": list(raw_train.column_names),
+        "raw_schema": asdict(raw_schema),
+        "pyarrow_version": PYARROW_VERSION,
+        "datasets_version": hf_datasets.__version__,
+        "fingerprint": _dataset_fingerprint(raw_train),
+    }
+    meta_path.write_text(json.dumps(metadata, indent=2, sort_keys=True), encoding="utf-8")
+    return metadata
+
+
+def load_or_prepare_raw_train(
+    dataset_name: str,
+    *,
+    revision: str | None,
+    cache_dir: Path | None,
+    raw_root: Path,
+    raw_schema: RawSchema,
+    refresh_raw: bool,
+) -> tuple[HFDataset, dict[str, Any], bool]:
+    """Load raw train data from `data/raw/` if it matches, otherwise download and persist it."""
+    meta_path = raw_root / RAW_METADATA_FILENAME
+    train_path = raw_root / RAW_TRAIN_FILENAME
+
+    if not refresh_raw and meta_path.exists() and train_path.exists():
+        try:
+            raw_train, metadata = _load_local_raw_train(raw_root)
+        except Exception as exc:
+            logger.info("Found local raw artifacts but failed to load them: %s. Re-downloading raw.", exc)
+        else:
+            if _raw_metadata_matches(metadata, dataset_name=dataset_name, revision=revision):
+                logger.info("Reusing raw artifacts from %s", raw_root)
+                return raw_train, metadata, True
+            logger.info("Found local raw artifacts but metadata does not match. Re-downloading raw.")
+
+    logger.info("Downloading raw dataset from Hugging Face: %s (revision=%s)", dataset_name, revision)
+    ds = load_raw_hf_dataset(dataset_name, revision=revision, cache_dir=cache_dir)
+    if "train" not in ds:
+        raise ValueError(f"Expected a `train` split in the raw dataset. Available splits: {list(ds.keys())}")
+
+    raw_train = ds["train"]
+    validate_raw_schema(raw_train, raw_schema)
+
+    logger.info("Writing raw artifacts to %s", raw_root)
+    metadata = _write_local_raw_train(
+        raw_train,
+        raw_root=raw_root,
+        dataset_name=dataset_name,
+        revision=revision,
+        raw_schema=raw_schema,
+    )
+    return raw_train, metadata, False
+
+
 def build_processed_data(
     *,
     dataset_name: str = typer.Option(DEFAULT_DATASET_NAME, help="Hugging Face dataset name."),
     revision: str | None = typer.Option(None, help="Optional dataset revision (commit hash or tag)."),
     cache_dir: Path | None = typer.Option(None, help="Optional Hugging Face cache directory."),
+    raw_root: Path = typer.Option(DEFAULT_RAW_ROOT, help="Directory for raw cached artifacts (parquet + metadata)."),
+    refresh_raw: bool = typer.Option(False, "--refresh-raw", help="Force re-download and overwrite raw artifacts."),
     output_root: Path = typer.Option(Path("data/processed"), help="Where to write processed datasets."),
     seed: int = typer.Option(42, help="Random seed used for deterministic sampling/splitting."),
     test_size: float = typer.Option(0.1, help="Fraction used for the test split."),
@@ -235,14 +332,16 @@ def build_processed_data(
     raw_schema = RawSchema()
     processed_schema = ProcessedSchema(label2id=dict(DEFAULT_LABEL2ID))
 
-    logger.info("Loading dataset from Hugging Face: %s", dataset_name)
-    ds = load_raw_hf_dataset(dataset_name, revision=revision, cache_dir=cache_dir)
-    if "train" not in ds:
-        raise ValueError(f"Expected a `train` split in the raw dataset. Available splits: {list(ds.keys())}")
-
-    validate_raw_schema(ds["train"], raw_schema)
-    dropped_raw_columns = [c for c in raw_schema.drop_columns if c in ds["train"].column_names]
-    cleaned = clean_and_encode_labels(ds["train"], raw_schema=raw_schema, processed_schema=processed_schema)
+    raw_train, raw_metadata, raw_reused = load_or_prepare_raw_train(
+        dataset_name,
+        revision=revision,
+        cache_dir=cache_dir,
+        raw_root=raw_root,
+        raw_schema=raw_schema,
+        refresh_raw=refresh_raw,
+    )
+    dropped_raw_columns = [c for c in raw_schema.drop_columns if c in raw_train.column_names]
+    cleaned = clean_and_encode_labels(raw_train, raw_schema=raw_schema, processed_schema=processed_schema)
 
     tiers: list[tuple[str, HFDataset, int | None]] = [
         ("small", _select_n(cleaned, small_size, seed=seed), small_size),
@@ -271,8 +370,15 @@ def build_processed_data(
             "label2id": dict(DEFAULT_LABEL2ID),
             "id2label": {str(k): v for k, v in DEFAULT_ID2LABEL.items()},
             "pyarrow_version": PYARROW_VERSION,
+            "raw_artifact": {
+                "root": str(raw_root),
+                "train_parquet": str(raw_root / RAW_TRAIN_FILENAME),
+                "metadata_json": str(raw_root / RAW_METADATA_FILENAME),
+                "reused": raw_reused,
+                "metadata": raw_metadata,
+            },
             "fingerprints": {
-                "raw_train": _dataset_fingerprint(ds["train"]),
+                "raw_train": _dataset_fingerprint(raw_train),
                 "cleaned": _dataset_fingerprint(cleaned),
                 "tier_dataset": _dataset_fingerprint(tier_ds),
                 "splits": {k: _dataset_fingerprint(v) for k, v in splits.items()},

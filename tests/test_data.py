@@ -8,6 +8,7 @@ from sns_mlops.data import (
     ProcessedSchema,
     RawSchema,
     clean_and_encode_labels,
+    load_or_prepare_raw_train,
     make_train_val_test_splits,
     validate_raw_schema,
     write_processed_splits,
@@ -97,3 +98,34 @@ def test_write_processed_splits_writes_parquet_and_metadata(tmp_path):
 
     stored = json.loads((tmp_path / "metadata.json").read_text(encoding="utf-8"))
     assert stored == metadata
+
+
+def test_load_or_prepare_raw_train_reuses_matching_raw(tmp_path):
+    raw_root = tmp_path / "raw"
+    raw_root.mkdir(parents=True, exist_ok=True)
+
+    raw = HFDataset.from_dict(
+        {
+            "text": ["hello", "world"],
+            "label": ["positive", "negative"],
+            "netloc": ["example.com", "example.com"],
+            "url": ["https://example.com/1", "https://example.com/2"],
+        }
+    )
+    raw.to_parquet(str(raw_root / "train.parquet"))
+    (raw_root / "metadata.json").write_text(
+        json.dumps({"dataset_name": "dummy", "revision": None, "num_rows": 2}, indent=2),
+        encoding="utf-8",
+    )
+
+    loaded, meta, reused = load_or_prepare_raw_train(
+        "dummy",
+        revision=None,
+        cache_dir=None,
+        raw_root=raw_root,
+        raw_schema=RawSchema(),
+        refresh_raw=False,
+    )
+    assert reused is True
+    assert meta["dataset_name"] == "dummy"
+    assert len(loaded) == 2
