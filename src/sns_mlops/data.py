@@ -8,12 +8,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final
 
+import datasets as hf_datasets
 import pyarrow
 import typer
-import datasets as hf_datasets
-from datasets import ClassLabel
+from datasets import ClassLabel, DatasetDict, load_dataset
 from datasets import Dataset as HFDataset
-from datasets import DatasetDict, load_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -71,9 +70,7 @@ def validate_raw_schema(dataset: HFDataset, schema: RawSchema) -> None:
     allowed_columns = required_columns | set(schema.drop_columns)
     unexpected_columns = [col for col in dataset.column_names if col not in allowed_columns]
     if unexpected_columns:
-        raise ValueError(
-            f"Unexpected raw columns: {unexpected_columns}. Allowed columns: {sorted(allowed_columns)}"
-        )
+        raise ValueError(f"Unexpected raw columns: {unexpected_columns}. Allowed columns: {sorted(allowed_columns)}")
 
     if len(dataset) == 0:
         raise ValueError("Raw dataset is empty.")
@@ -93,7 +90,8 @@ def validate_raw_schema(dataset: HFDataset, schema: RawSchema) -> None:
     is_int_label = isinstance(label_dtype, str) and (label_dtype.startswith("int") or label_dtype.startswith("uint"))
     if label_dtype not in {"string", "large_string"} and not is_int_label:
         raise ValueError(
-            f"Expected `{schema.label_column}` to be a ClassLabel, an integer column, or a string column, got {label_feature!r}"
+            f"Expected `{schema.label_column}` to be a ClassLabel, an integer column, or a string column, "
+            f"got {label_feature!r}"
         )
 
 

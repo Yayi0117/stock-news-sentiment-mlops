@@ -211,7 +211,11 @@ We manage dependencies using a Conda environment defined in `environment.yml` (n
 >
 > Answer:
 
---- question 7 fill here ---
+We implemented 15 unit tests covering the most failure-prone parts of the project: (1) the data pipeline (raw schema
+validation, label encoding, deterministic splitting, Parquet/metadata writing, and raw cache reuse), (2) model
+construction utilities (label mappings and correct configuration wiring), and (3) the training entrypoint (artifact
+creation and save flags) using a fully offline dummy Trainer to avoid network downloads. The tests are designed to run
+fast in CI and do not require Hugging Face model or dataset downloads.
 
 ### Question 8
 
@@ -226,7 +230,13 @@ We manage dependencies using a Conda environment defined in `environment.yml` (n
 >
 > Answer:
 
---- question 8 fill here ---
+Our current total code coverage is 70% for the `sns_mlops` package (measured with `coverage run --source=sns_mlops -m
+pytest -q` and `coverage report -m`). Coverage helps us verify that core code paths are executed by tests (e.g. schema
+validation, deterministic splitting, and training artifact writing), and it provides a concrete signal when refactors
+silently reduce test effectiveness. However, even a coverage of 100% would not guarantee an error-free system: tests may
+miss edge cases, cover code without asserting correctness, or fail to model real-world inputs (e.g. malformed data or
+unexpected upstream changes). Therefore, we use coverage as a quality indicator, not as a correctness proof, and we
+prioritize meaningful assertions on critical behavior over maximizing percentage alone.
 
 ### Question 9
 
@@ -273,7 +283,21 @@ Yes. We use DVC to manage the reproducibility of our data preprocessing pipeline
 >
 > Answer:
 
---- question 11 fill here ---
+We use GitHub Actions for continuous integration with two main workflows: `tests.yaml` and `linting.yaml`. The test
+workflow runs unit tests and generates a coverage report on a matrix of operating systems (Ubuntu, Windows, macOS) and
+Python versions (3.11 and 3.12). Dependencies are installed deterministically from `requirements.txt` and
+`requirements_dev.txt`, followed by `pip install -e .` to ensure the package import path matches real usage. We enable
+pip caching via `actions/setup-python` and invalidate the cache whenever `requirements*.txt` or `pyproject.toml`
+changes. To prevent accidental regressions that trigger external downloads during CI, the workflow sets
+`HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1`, so any unexpected Hugging Face fetch would fail fast. After running
+tests, we create `coverage.xml` and upload it as a downloadable artifact per job.
+
+The lint workflow runs `ruff check .` and `ruff format --check .` on push and pull requests. This enforces consistent
+style and catches common issues early, supporting good coding practices. Additionally, we use pre-commit hooks locally
+to run the same checks before commits. Developers can enable this by running `pip install pre-commit`, `pre-commit
+install`, and `pre-commit run --all-files`. We also keep a scheduled workflow (`pre-commit-update.yaml`) that runs
+`pre-commit autoupdate` weekly and opens a PR only when hook versions change, keeping tooling up-to-date with minimal
+manual effort.
 
 ## Running code and tracking experiments
 

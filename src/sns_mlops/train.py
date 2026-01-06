@@ -161,7 +161,12 @@ def train(
     logger.info("Starting training run")
     logger.info("tier=%s processed_root=%s output_dir=%s", tier, processed_root, run_output_dir)
     logger.info("model=%s revision=%s", model_name, model_revision)
-    logger.info("save_model=%s save_checkpoints=%s overwrite_output_dir=%s", save_model, save_checkpoints, overwrite_output_dir)
+    logger.info(
+        "save_model=%s save_checkpoints=%s overwrite_output_dir=%s",
+        save_model,
+        save_checkpoints,
+        overwrite_output_dir,
+    )
 
     set_seed(seed)
 
