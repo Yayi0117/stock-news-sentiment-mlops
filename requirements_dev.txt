@@ -17,4 +17,4 @@ mkdocs-material==9.6.1
 mkdocstrings-python==1.16.10
 
 # data versioning
-dvc==3.63.0
+dvc==3.66.0
