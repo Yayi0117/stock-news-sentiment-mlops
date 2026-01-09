@@ -1,16 +1,29 @@
-FROM python:3.12-slim AS base
+FROM python:3.12-slim
 
-RUN apt update && \
-    apt install --no-install-recommends -y build-essential gcc && \
-    apt clean && rm -rf /var/lib/apt/lists/*
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    HF_HOME=/root/.cache/huggingface
 
-COPY src src/
+WORKDIR /app
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y build-essential gcc libgomp1 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy dependency definition first to maximize Docker layer caching.
 COPY requirements.txt requirements.txt
-COPY requirements_dev.txt requirements_dev.txt
-COPY README.md README.md
 COPY pyproject.toml pyproject.toml
+COPY README.md README.md
 
-RUN pip install -r requirements.txt --no-cache-dir --verbose
-RUN pip install . --no-deps --no-cache-dir --verbose
+RUN python -m pip install -U pip setuptools wheel && \
+    pip install --no-cache-dir \
+      --index-url https://download.pytorch.org/whl/cpu \
+      --extra-index-url https://pypi.org/simple \
+      -r requirements.txt
 
-ENTRYPOINT ["python", "-u", "src/sns_mlops/train.py"]
+# Copy source code last so changes do not invalidate dependency layers.
+COPY src/ src/
+
+RUN pip install . --no-deps --no-cache-dir
+
+ENTRYPOINT ["python", "-u", "-m", "sns_mlops.train"]

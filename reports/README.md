@@ -46,37 +46,37 @@ will check the repositories and the code to verify your answers.
 
 ### Week 1
 
-* [ ] Create a git repository (M5)
+* [√] Create a git repository (M5)
 * [ ] Make sure that all team members have write access to the GitHub repository (M5)
-* [ ] Create a dedicated environment for you project to keep track of your packages (M2)
-* [ ] Create the initial file structure using cookiecutter with an appropriate template (M6)
-* [ ] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
-* [ ] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
-* [ ] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
+* [√] Create a dedicated environment for you project to keep track of your packages (M2)
+* [√] Create the initial file structure using cookiecutter with an appropriate template (M6)
+* [√] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
+* [√] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
+* [√] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
     are using (M2+M6)
-* [ ] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
+* [√] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
 * [ ] Do a bit of code typing and remember to document essential parts of your code (M7)
-* [ ] Setup version control for your data or part of your data (M8)
-* [ ] Add command line interfaces and project commands to your code where it makes sense (M9)
-* [ ] Construct one or multiple docker files for your code (M10)
-* [ ] Build the docker files locally and make sure they work as intended (M10)
+* [√] Setup version control for your data or part of your data (M8)
+* [√] Add command line interfaces and project commands to your code where it makes sense (M9)
+* [√] Construct one or multiple docker files for your code (M10)
+* [√] Build the docker files locally and make sure they work as intended (M10)
 * [ ] Write one or multiple configurations files for your experiments (M11)
 * [ ] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
-* [ ] Use logging to log important events in your code (M14)
+* [√] Use logging to log important events in your code (M14)
 * [ ] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
 * [ ] Consider running a hyperparameter optimization sweep (M14)
 * [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
 ### Week 2
 
-* [ ] Write unit tests related to the data part of your code (M16)
-* [ ] Write unit tests related to model construction and or model training (M16)
-* [ ] Calculate the code coverage (M16)
-* [ ] Get some continuous integration running on the GitHub repository (M17)
-* [ ] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
-* [ ] Add a linting step to your continuous integration (M17)
-* [ ] Add pre-commit hooks to your version control setup (M18)
+* [√] Write unit tests related to the data part of your code (M16)
+* [√] Write unit tests related to model construction and or model training (M16)
+* [√] Calculate the code coverage (M16)
+* [√] Get some continuous integration running on the GitHub repository (M17)
+* [√] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
+* [√] Add a linting step to your continuous integration (M17)
+* [√] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
 * [ ] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
@@ -112,6 +112,7 @@ will check the repositories and the code to verify your answers.
 ## Group information
 
 ### Question 1
+>
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
 > Answer:
@@ -119,6 +120,7 @@ will check the repositories and the code to verify your answers.
 --- question 1 fill here ---
 
 ### Question 2
+>
 > **Enter the study number for each member in the group**
 >
 > Example:
@@ -130,6 +132,7 @@ will check the repositories and the code to verify your answers.
 --- question 2 fill here ---
 
 ### Question 3
+>
 > **A requirement to the project is that you include a third-party package not covered in the course. What framework**
 > **did you choose to work with and did it help you complete the project?**
 >
@@ -363,7 +366,21 @@ We ensure reproducibility at multiple levels. First, we pin Python and package v
 >
 > Answer:
 
---- question 15 fill here ---
+We use Docker to package the training entrypoint and its runtime dependencies into a reproducible, CPU-only container.
+The training image is defined in `dockerfiles/train.dockerfile` and installs pinned Python dependencies from
+`requirements.txt` and the project package itself. This reduces “works on my machine” issues when running training on
+different computers or CI runners.
+
+To build the image locally:
+`docker build -f dockerfiles/train.dockerfile -t sns-mlops-train .`
+
+To run a short smoke training run (requires processed data on the host, e.g. generated via `dvc repro data`), mount the
+data and output directories:
+`docker run --rm -v ./data/processed:/app/data/processed:ro -v ./models:/app/models sns-mlops-train --tier small --num-train-epochs 1 --max-train-samples 32 --max-eval-samples 32 --max-test-samples 32 --per-device-train-batch-size 4 --per-device-eval-batch-size 4 --no-save-checkpoints`
+
+The run writes artifacts to `models/finbert/small/`, including `metrics.json`, `run_config.json`, and `train.log`. The
+first run downloads the FinBERT weights from the Hugging Face Hub; to reuse caches between runs you can additionally
+mount a cache directory to `/root/.cache/huggingface`.
 
 ### Question 16
 
