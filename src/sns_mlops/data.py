@@ -1,3 +1,22 @@
+"""Data ingestion and preprocessing pipeline.
+
+This module builds reproducible dataset tiers (`small`, `dev`, `full`) for a
+sentiment classification task using the Hugging Face dataset
+`NOSIBLE/financial-sentiment`.
+
+Key features:
+- Schema validation of the raw dataset (required/allowed columns + label types).
+- Minimal cleaning (drop irrelevant columns, filter invalid rows, encode labels).
+- Deterministic splits into train/val/test using a fixed seed.
+- Materialization to Parquet with a `metadata.json` sidecar for traceability.
+- Raw caching and reuse: a raw parquet artifact is stored under `data/raw/` and
+  reused if `dataset_name` and `revision` match.
+
+Outputs:
+- `data/raw/train.parquet` + `data/raw/metadata.json`
+- `data/processed/<tier>/{train,val,test}.parquet` + `data/processed/<tier>/metadata.json`
+"""
+
 from __future__ import annotations
 
 import json
@@ -53,7 +72,17 @@ def load_raw_hf_dataset(
     revision: str | None = None,
     cache_dir: Path | None = None,
 ) -> DatasetDict:
-    """Load the raw dataset from the Hugging Face Hub."""
+    """Load the raw dataset from the Hugging Face Hub.
+
+    Args:
+        dataset_name: Hugging Face dataset name.
+        revision: Optional dataset revision (commit hash or tag). If `None`, the
+            latest revision will be used.
+        cache_dir: Optional local cache directory for datasets.
+
+    Returns:
+        A Hugging Face `DatasetDict` containing the dataset splits.
+    """
     ds = load_dataset(dataset_name, revision=revision, cache_dir=str(cache_dir) if cache_dir else None)
     if not isinstance(ds, DatasetDict):
         raise TypeError(f"Expected `load_dataset` to return a DatasetDict, got {type(ds)!r}")
@@ -61,7 +90,19 @@ def load_raw_hf_dataset(
 
 
 def validate_raw_schema(dataset: HFDataset, schema: RawSchema) -> None:
-    """Validate raw columns and basic types."""
+    """Validate raw columns and basic types.
+
+    The pipeline expects at minimum a text column and a label column. Additional
+    columns are only allowed if they are explicitly listed in `drop_columns`.
+
+    Args:
+        dataset: A Hugging Face Dataset representing the raw split.
+        schema: The expected raw schema (column names and droppable columns).
+
+    Raises:
+        ValueError: If required columns are missing, unexpected columns are
+            present, the dataset is empty, or types do not match expectations.
+    """
     required_columns = {schema.text_column, schema.label_column}
     missing = [col for col in required_columns if col not in dataset.column_names]
     if missing:
@@ -101,7 +142,24 @@ def clean_and_encode_labels(
     raw_schema: RawSchema,
     processed_schema: ProcessedSchema,
 ) -> HFDataset:
-    """Drop irrelevant columns, normalize text/labels, and encode labels to integers."""
+    """Drop irrelevant columns, normalize text/labels, and encode labels to integers.
+
+    Cleaning rules are intentionally simple and deterministic:
+    - Filter empty/whitespace-only texts.
+    - Drop explicitly droppable raw columns.
+    - Map labels to integer ids and store both `label` and `label_text`.
+
+    Args:
+        dataset: Raw dataset split (e.g., the `train` split).
+        raw_schema: Schema describing raw column names.
+        processed_schema: Schema describing processed column names and label mapping.
+
+    Returns:
+        A cleaned dataset containing only the processed columns.
+
+    Raises:
+        ValueError: If a label is outside the supported label set.
+    """
     to_remove = [c for c in raw_schema.drop_columns if c in dataset.column_names]
     if to_remove:
         dataset = dataset.remove_columns(to_remove)
@@ -163,7 +221,17 @@ def make_train_val_test_splits(
     test_size: float,
     val_size: float,
 ) -> DatasetDict:
-    """Create deterministic train/val/test splits from a single dataset."""
+    """Create deterministic train/val/test splits from a single dataset.
+
+    Args:
+        dataset: The dataset to split.
+        seed: Random seed for deterministic splitting.
+        test_size: Fraction reserved for the test split.
+        val_size: Fraction reserved for the validation split (applied after test split).
+
+    Returns:
+        A `DatasetDict` with keys `train`, `val`, and `test`.
+    """
     if not 0.0 < test_size < 1.0:
         raise ValueError("`test_size` must be between 0 and 1.")
     if not 0.0 < val_size < 1.0:
@@ -194,7 +262,13 @@ def write_processed_splits(
     output_dir: Path,
     metadata: dict[str, Any],
 ) -> None:
-    """Write the processed splits to parquet with a metadata sidecar."""
+    """Write the processed splits to parquet with a metadata sidecar.
+
+    Args:
+        splits: A `DatasetDict` containing `train`, `val`, and `test`.
+        output_dir: Output directory for the tier.
+        metadata: JSON-serializable metadata payload.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for split_name in ("train", "val", "test"):
@@ -276,7 +350,23 @@ def load_or_prepare_raw_train(
     raw_schema: RawSchema,
     refresh_raw: bool,
 ) -> tuple[HFDataset, dict[str, Any], bool]:
-    """Load raw train data from `data/raw/` if it matches, otherwise download and persist it."""
+    """Load raw train data from `data/raw/` if it matches, otherwise download and persist it.
+
+    Raw reuse is only allowed when the local metadata matches the requested
+    `dataset_name` and `revision` (including `None`).
+
+    Args:
+        dataset_name: Hugging Face dataset name.
+        revision: Optional dataset revision (commit hash or tag).
+        cache_dir: Optional Hugging Face cache directory.
+        raw_root: Directory for raw artifacts.
+        raw_schema: Expected schema for the raw dataset.
+        refresh_raw: If True, forces a re-download and overwrites local raw artifacts.
+
+    Returns:
+        A tuple of `(raw_train_dataset, raw_metadata, reused)` where `reused` is
+        True when local raw artifacts were reused.
+    """
     meta_path = raw_root / RAW_METADATA_FILENAME
     train_path = raw_root / RAW_TRAIN_FILENAME
 
@@ -324,7 +414,14 @@ def build_processed_data(
     small_size: int = typer.Option(2_000, help="Number of examples for the `small` tier."),
     dev_size: int = typer.Option(10_000, help="Number of examples for the `dev` tier."),
 ) -> None:
-    """Download, validate, preprocess, and persist `small`/`dev`/`full` datasets."""
+    """Download, validate, preprocess, and persist `small`/`dev`/`full` datasets.
+
+    This is the main CLI entrypoint (`python src/sns_mlops/data.py ...`).
+
+    Writes:
+    - `data/raw/train.parquet` + `data/raw/metadata.json` (reused when possible)
+    - `data/processed/<tier>/{train,val,test}.parquet` + `metadata.json`
+    """
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
     raw_schema = RawSchema()

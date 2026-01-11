@@ -1,12 +1,14 @@
 Generating the docs
 ----------
 
-Use [mkdocs](http://www.mkdocs.org/) structure to update the documentation.
+This repository uses MkDocs with the Material theme. The MkDocs configuration is
+located at `docs/mkdocs.yaml` and the documentation sources are under
+`docs/source/`.
 
-Build locally with:
+Build locally from the repository root:
 
-    mkdocs build
+    mkdocs build --config-file docs/mkdocs.yaml
 
-Serve locally with:
+Serve locally (auto-rebuild on changes):
 
-    mkdocs serve
+    mkdocs serve --config-file docs/mkdocs.yaml

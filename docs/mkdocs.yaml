@@ -21,3 +21,7 @@ plugins:
 
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
+  - Pipeline: pipeline.md
+  - Experiments: experiments.md
+  - API Reference: api.md

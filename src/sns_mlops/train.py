@@ -1,3 +1,23 @@
+"""Model training entrypoint for FinBERT sentiment classification.
+
+This module fine-tunes `ProsusAI/finbert` using the Hugging Face Transformers
+`Trainer` API. It is designed to be:
+- Reproducible: fixed seeds, pinned dependencies, and a `run_config.json` snapshot.
+- CI-friendly: unit tests monkeypatch training to stay offline and fast.
+- DVC-friendly: the `train` stage tracks only small artifacts (metrics/config/log),
+  while model weights are saved locally but not tracked by DVC to avoid large
+  artifacts.
+
+Inputs:
+- Processed parquet splits under `data/processed/<tier>/{train,val,test}.parquet`.
+
+Outputs (written to `models/finbert/<tier>/`):
+- `run_config.json`: arguments + versions + git commit.
+- `metrics.json`: train/val/test metrics.
+- `train.log`: training logs.
+- Optional `model/`: final model + tokenizer (not tracked by DVC).
+"""
+
 from __future__ import annotations
 
 import json
@@ -51,6 +71,7 @@ class RunConfig:
 
 
 def _setup_logging(output_dir: Path) -> None:
+    """Configure logging to both stdout and `train.log` under the output directory."""
     output_dir.mkdir(parents=True, exist_ok=True)
     log_path = output_dir / "train.log"
     logging.basicConfig(
@@ -69,6 +90,7 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _try_get_git_commit() -> str | None:
+    """Best-effort lookup of the current git commit hash."""
     try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -83,6 +105,7 @@ def _try_get_git_commit() -> str | None:
 
 
 def _load_processed_dataset(processed_root: Path, tier: str) -> DatasetDict:
+    """Load `{train,val,test}.parquet` splits for a given tier from disk."""
     tier_dir = processed_root / tier
     data_files = {
         TRAIN_SPLIT: str(tier_dir / f"{TRAIN_SPLIT}.parquet"),
@@ -96,6 +119,11 @@ def _load_processed_dataset(processed_root: Path, tier: str) -> DatasetDict:
 
 
 def _maybe_subsample(dataset: Dataset, n: int | None, *, seed: int) -> Dataset:
+    """Optionally subsample a dataset deterministically.
+
+    This is used to keep smoke runs and CI-friendly runs fast, while keeping full
+    runs unchanged.
+    """
     if n is None:
         return dataset
     if n <= 0:
@@ -111,6 +139,7 @@ def _prepare_tokenized_splits(
     tokenizer,
     max_length: int,
 ) -> DatasetDict:
+    """Tokenize all dataset splits and remove unused text columns."""
     if LABEL_COLUMN in splits[TRAIN_SPLIT].column_names:
         splits = splits.rename_column(LABEL_COLUMN, "labels")
 
@@ -122,6 +151,7 @@ def _prepare_tokenized_splits(
 
 
 def _compute_metrics(eval_pred: EvalPrediction) -> dict[str, float]:
+    """Compute accuracy and macro-F1 from logits and labels."""
     logits, labels = eval_pred.predictions, eval_pred.label_ids
     preds = np.argmax(logits, axis=-1)
     return {
@@ -152,7 +182,33 @@ def train(
     save_model: bool,
     save_checkpoints: bool,
 ) -> None:
-    """Fine-tune a FinBERT model using the Hugging Face Trainer API."""
+    """Fine-tune a FinBERT model using the Hugging Face Trainer API.
+
+    Args:
+        tier: Dataset tier to use: `small`, `dev`, or `full`.
+        processed_root: Root directory containing processed parquet splits.
+        output_dir: Root directory where run artifacts will be written.
+        model_name: Hugging Face model identifier (defaults to FinBERT).
+        model_revision: Optional model revision (commit hash or tag).
+        seed: Random seed used for deterministic behavior.
+        max_length: Max sequence length for tokenization.
+        num_train_epochs: Number of training epochs.
+        learning_rate: Optimizer learning rate.
+        weight_decay: Optimizer weight decay.
+        per_device_train_batch_size: Training batch size per device.
+        per_device_eval_batch_size: Eval batch size per device.
+        max_train_samples: Optional cap for training samples (for smoke runs).
+        max_eval_samples: Optional cap for validation samples (for smoke runs).
+        max_test_samples: Optional cap for test samples (for smoke runs).
+        save_total_limit: Trainer checkpoint retention limit (only used if saving).
+        overwrite_output_dir: If True, clears the tier output directory first.
+        save_model: If True, saves final model + tokenizer to `model/`.
+        save_checkpoints: If True, enables epoch checkpoints (disabled by default).
+
+    Raises:
+        FileNotFoundError: If processed parquet splits are missing.
+        ValueError: For invalid argument combinations.
+    """
     run_output_dir = output_dir / tier
     if overwrite_output_dir and run_output_dir.exists():
         shutil.rmtree(run_output_dir)

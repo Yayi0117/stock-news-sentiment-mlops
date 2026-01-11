@@ -189,3 +189,4 @@ projects.md
 AGENTS.md
 models/**
 !models/.gitkeep
+handoff.md

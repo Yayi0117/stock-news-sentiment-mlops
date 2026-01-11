@@ -146,6 +146,8 @@ will check the repositories and the code to verify your answers.
 
 --- question 3 fill here ---
 
+We used Hugging Face Transformers as the main third-party framework beyond the course core tooling. Transformers provides the `Trainer` abstraction, pretrained model loading, tokenization, and model export, which allowed us to focus on MLOps engineering quality rather than writing and debugging a custom PyTorch training loop. We also used the Hugging Face Datasets library to standardize data loading and Parquet materialization, which integrates well with deterministic splits and DVC-based reproducibility. Together, these libraries reduced boilerplate, improved maintainability, and made it straightforward to create reproducible run artifacts (`run_config.json`, `metrics.json`, and `train.log`).
+
 ## Coding environment
 
 > In the following section we are interested in learning more about you local development environment. This includes
@@ -182,6 +184,8 @@ We manage dependencies using a Conda environment defined in `environment.yml` (n
 
 --- question 5 fill here ---
 
+We initialized the repository from the official cookiecutter MLOps template and kept the overall structure. We filled out the core project modules under `src/sns_mlops/`, focusing on a reproducible data pipeline (`data.py`), FinBERT model construction (`model.py`), and a Trainer-based training entrypoint (`train.py`). We added unit tests under `tests/` covering data, model configuration, and the training artifact contract. For reproducibility and artifact tracking, we enabled DVC and defined `data` and `train` stages in `dvc.yaml`. We also kept the provided documentation skeleton under `docs/` (MkDocs + Material) and added pages describing how to run the pipeline. Finally, we added a CPU-only training Dockerfile under `dockerfiles/` to make training runnable in a container.
+
 ### Question 6
 
 > **Did you implement any rules for code quality and format? What about typing and documentation? Additionally,**
@@ -196,6 +200,8 @@ We manage dependencies using a Conda environment defined in `environment.yml` (n
 > Answer:
 
 --- question 6 fill here ---
+
+We enforce code quality and consistent formatting using ruff (`ruff check .` and `ruff format --check .`) configured in `pyproject.toml`, and we run these checks in CI. Locally, we use pre-commit hooks (`.pre-commit-config.yaml`) to run ruff and basic sanity checks (YAML/JSON validation, trailing whitespace fixes) before commits. We use type hints in the core pipeline and provide docstrings for the key modules and entrypoints; in addition, we maintain MkDocs-based project documentation to make the pipeline runnable by new team members. These practices matter in larger projects because they reduce ambiguity, prevent style drift, catch errors early, and make collaboration and long-term maintenance feasible.
 
 ## Version control
 
@@ -214,11 +220,7 @@ We manage dependencies using a Conda environment defined in `environment.yml` (n
 >
 > Answer:
 
-We implemented 15 unit tests covering the most failure-prone parts of the project: (1) the data pipeline (raw schema
-validation, label encoding, deterministic splitting, Parquet/metadata writing, and raw cache reuse), (2) model
-construction utilities (label mappings and correct configuration wiring), and (3) the training entrypoint (artifact
-creation and save flags) using a fully offline dummy Trainer to avoid network downloads. The tests are designed to run
-fast in CI and do not require Hugging Face model or dataset downloads.
+We implemented 15 unit tests covering the most failure-prone parts of the project: (1) the data pipeline (raw schema validation, label encoding, deterministic splitting, Parquet/metadata writing, and raw cache reuse), (2) model construction utilities (label mappings and correct configuration wiring), and (3) the training entrypoint (artifact creation and save flags) using a fully offline dummy Trainer to avoid network downloads. The tests are designed to run fast in CI and do not require Hugging Face model or dataset downloads.
 
 ### Question 8
 
@@ -233,13 +235,7 @@ fast in CI and do not require Hugging Face model or dataset downloads.
 >
 > Answer:
 
-Our current total code coverage is 70% for the `sns_mlops` package (measured with `coverage run --source=sns_mlops -m
-pytest -q` and `coverage report -m`). Coverage helps us verify that core code paths are executed by tests (e.g. schema
-validation, deterministic splitting, and training artifact writing), and it provides a concrete signal when refactors
-silently reduce test effectiveness. However, even a coverage of 100% would not guarantee an error-free system: tests may
-miss edge cases, cover code without asserting correctness, or fail to model real-world inputs (e.g. malformed data or
-unexpected upstream changes). Therefore, we use coverage as a quality indicator, not as a correctness proof, and we
-prioritize meaningful assertions on critical behavior over maximizing percentage alone.
+Our current total code coverage is 70% for the `sns_mlops` package (measured with `coverage run --source=sns_mlops -m pytest -q` and `coverage report -m`). Coverage helps us verify that core code paths are executed by tests (e.g. schema validation, deterministic splitting, and training artifact writing), and it provides a concrete signal when refactors silently reduce test effectiveness. However, even a coverage of 100% would not guarantee an error-free system: tests may miss edge cases, cover code without asserting correctness, or fail to model real-world inputs (e.g. malformed data or unexpected upstream changes). Therefore, we use coverage as a quality indicator, not as a correctness proof, and we prioritize meaningful assertions on critical behavior over maximizing percentage alone.
 
 ### Question 9
 
@@ -255,6 +251,8 @@ prioritize meaningful assertions on critical behavior over maximizing percentage
 > Answer:
 
 --- question 9 fill here ---
+
+Yes. We work on feature branches and merge changes through pull requests into the default branch (`master`). Each pull request triggers GitHub Actions workflows for unit tests, coverage, and linting, which provides a clear quality gate before merging. This workflow helps the team collaborate safely by keeping changes reviewable and by ensuring that the main branch remains in a runnable state. As a next step, we can add GitHub branch protection rules to require status checks to pass and at least one approval before merging.
 
 ### Question 10
 
@@ -286,21 +284,9 @@ Yes. We use DVC to manage the reproducibility of our data preprocessing pipeline
 >
 > Answer:
 
-We use GitHub Actions for continuous integration with two main workflows: `tests.yaml` and `linting.yaml`. The test
-workflow runs unit tests and generates a coverage report on a matrix of operating systems (Ubuntu, Windows, macOS) and
-Python versions (3.11 and 3.12). Dependencies are installed deterministically from `requirements.txt` and
-`requirements_dev.txt`, followed by `pip install -e .` to ensure the package import path matches real usage. We enable
-pip caching via `actions/setup-python` and invalidate the cache whenever `requirements*.txt` or `pyproject.toml`
-changes. To prevent accidental regressions that trigger external downloads during CI, the workflow sets
-`HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1`, so any unexpected Hugging Face fetch would fail fast. After running
-tests, we create `coverage.xml` and upload it as a downloadable artifact per job.
+We use GitHub Actions for continuous integration with two main workflows: `tests.yaml` and `linting.yaml`. The test workflow runs unit tests and generates a coverage report on a matrix of operating systems (Ubuntu, Windows, macOS) and Python versions (3.11 and 3.12). Dependencies are installed deterministically from `requirements.txt` and `requirements_dev.txt`, followed by `pip install -e .` to ensure the package import path matches real usage. We enable pip caching via `actions/setup-python` and invalidate the cache whenever `requirements*.txt` or `pyproject.toml` changes. To prevent accidental regressions that trigger external downloads during CI, the workflow sets `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1`, so any unexpected Hugging Face fetch would fail fast. After running tests, we create `coverage.xml` and upload it as a downloadable artifact per job.
 
-The lint workflow runs `ruff check .` and `ruff format --check .` on push and pull requests. This enforces consistent
-style and catches common issues early, supporting good coding practices. Additionally, we use pre-commit hooks locally
-to run the same checks before commits. Developers can enable this by running `pip install pre-commit`, `pre-commit
-install`, and `pre-commit run --all-files`. We also keep a scheduled workflow (`pre-commit-update.yaml`) that runs
-`pre-commit autoupdate` weekly and opens a PR only when hook versions change, keeping tooling up-to-date with minimal
-manual effort.
+The lint workflow runs `ruff check .` and `ruff format --check .` on push and pull requests. This enforces consistent style and catches common issues early, supporting good coding practices. Additionally, we use pre-commit hooks locally to run the same checks before commits. Developers can enable this by running `pip install pre-commit`, `pre-commit install`, and `pre-commit run --all-files`. We also keep a scheduled workflow (`pre-commit-update.yaml`) that runs `pre-commit autoupdate` weekly and opens a PR only when hook versions change, keeping tooling up-to-date with minimal manual effort.
 
 ## Running code and tracking experiments
 
@@ -366,21 +352,15 @@ We ensure reproducibility at multiple levels. First, we pin Python and package v
 >
 > Answer:
 
-We use Docker to package the training entrypoint and its runtime dependencies into a reproducible, CPU-only container.
-The training image is defined in `dockerfiles/train.dockerfile` and installs pinned Python dependencies from
-`requirements.txt` and the project package itself. This reduces “works on my machine” issues when running training on
-different computers or CI runners.
+We use Docker to package the training entrypoint and its runtime dependencies into a reproducible, CPU-only container. The training image is defined in `dockerfiles/train.dockerfile` and installs pinned Python dependencies from `requirements.txt` and the project package itself. This reduces “works on my machine” issues when running training on different computers or CI runners.
 
 To build the image locally:
 `docker build -f dockerfiles/train.dockerfile -t sns-mlops-train .`
 
-To run a short smoke training run (requires processed data on the host, e.g. generated via `dvc repro data`), mount the
-data and output directories:
+To run a short smoke training run (requires processed data on the host, e.g. generated via `dvc repro data`), mount the data and output directories:
 `docker run --rm -v ./data/processed:/app/data/processed:ro -v ./models:/app/models sns-mlops-train --tier small --num-train-epochs 1 --max-train-samples 32 --max-eval-samples 32 --max-test-samples 32 --per-device-train-batch-size 4 --per-device-eval-batch-size 4 --no-save-checkpoints`
 
-The run writes artifacts to `models/finbert/small/`, including `metrics.json`, `run_config.json`, and `train.log`. The
-first run downloads the FinBERT weights from the Hugging Face Hub; to reuse caches between runs you can additionally
-mount a cache directory to `/root/.cache/huggingface`.
+The run writes artifacts to `models/finbert/small/`, including `metrics.json`, `run_config.json`, and `train.log`. The first run downloads the FinBERT weights from the Hugging Face Hub; to reuse caches between runs you can additionally mount a cache directory to `/root/.cache/huggingface`.
 
 ### Question 16
 

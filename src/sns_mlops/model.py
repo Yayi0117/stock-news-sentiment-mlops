@@ -1,3 +1,14 @@
+"""Model construction helpers for FinBERT sentiment classification.
+
+The training entrypoint uses these helpers to build a tokenizer, a model config,
+and the pretrained model weights in a consistent way.
+
+Key assumptions:
+- Labels follow the mapping used in the data pipeline:
+  `negative=0`, `neutral=1`, `positive=2`.
+- The default model is `ProsusAI/finbert`.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -19,7 +30,15 @@ DEFAULT_ID2LABEL: Final[dict[int, str]] = {v: k for k, v in DEFAULT_LABEL2ID.ite
 
 
 def get_label_mappings(*, label2id: dict[str, int] | None = None) -> tuple[dict[str, int], dict[int, str]]:
-    """Return copies of label mappings used for sentiment classification."""
+    """Return copies of label mappings used for sentiment classification.
+
+    Args:
+        label2id: Optional override mapping. If not provided, the project default
+            mapping is used.
+
+    Returns:
+        A tuple of `(label2id, id2label)` mappings.
+    """
     effective_label2id = DEFAULT_LABEL2ID if label2id is None else label2id
     return dict(effective_label2id), {v: k for k, v in effective_label2id.items()}
 
@@ -31,7 +50,17 @@ def build_tokenizer(
     cache_dir: Path | None = None,
     use_fast: bool = True,
 ) -> PreTrainedTokenizerBase:
-    """Build a tokenizer for the given Hugging Face model."""
+    """Build a tokenizer for the given Hugging Face model.
+
+    Args:
+        model_name: Model identifier on the Hugging Face Hub.
+        revision: Optional model revision (commit hash or tag).
+        cache_dir: Optional cache directory for Hugging Face downloads.
+        use_fast: Whether to prefer a fast tokenizer implementation.
+
+    Returns:
+        A Hugging Face tokenizer instance.
+    """
     return AutoTokenizer.from_pretrained(
         model_name,
         revision=revision,
@@ -47,7 +76,19 @@ def build_model_config(
     cache_dir: Path | None = None,
     label2id: dict[str, int] | None = None,
 ) -> PretrainedConfig:
-    """Build a model config with an explicit label mapping."""
+    """Build a model config with an explicit label mapping.
+
+    Explicit label mappings make downstream metrics and model export consistent.
+
+    Args:
+        model_name: Model identifier on the Hugging Face Hub.
+        revision: Optional model revision (commit hash or tag).
+        cache_dir: Optional cache directory for Hugging Face downloads.
+        label2id: Optional override mapping for labels.
+
+    Returns:
+        A Hugging Face config object.
+    """
     final_label2id, final_id2label = get_label_mappings(label2id=label2id)
     return AutoConfig.from_pretrained(
         model_name,
@@ -66,7 +107,18 @@ def build_pretrained_model(
     cache_dir: Path | None = None,
     config: PretrainedConfig | None = None,
 ) -> PreTrainedModel:
-    """Build a pretrained sequence classification model."""
+    """Build a pretrained sequence classification model.
+
+    Args:
+        model_name: Model identifier on the Hugging Face Hub.
+        revision: Optional model revision (commit hash or tag).
+        cache_dir: Optional cache directory for Hugging Face downloads.
+        config: Optional pre-built config. If not provided, a config is created
+            with the project label mapping.
+
+    Returns:
+        A Hugging Face `PreTrainedModel` ready for fine-tuning.
+    """
     final_config = config or build_model_config(model_name, revision=revision, cache_dir=cache_dir)
     return AutoModelForSequenceClassification.from_pretrained(
         model_name,
@@ -82,7 +134,16 @@ def build_tokenizer_and_model(
     revision: str | None = None,
     cache_dir: Path | None = None,
 ) -> tuple[PreTrainedTokenizerBase, PreTrainedModel]:
-    """Convenience function to build tokenizer and pretrained model consistently."""
+    """Convenience function to build tokenizer and pretrained model consistently.
+
+    Args:
+        model_name: Model identifier on the Hugging Face Hub.
+        revision: Optional model revision (commit hash or tag).
+        cache_dir: Optional cache directory for Hugging Face downloads.
+
+    Returns:
+        A `(tokenizer, model)` tuple.
+    """
     config = build_model_config(model_name, revision=revision, cache_dir=cache_dir)
     tokenizer = build_tokenizer(model_name, revision=revision, cache_dir=cache_dir)
     model = build_pretrained_model(model_name, revision=revision, cache_dir=cache_dir, config=config)
@@ -95,7 +156,16 @@ def tokenize_batch(
     *,
     max_length: int = 128,
 ) -> dict[str, Any]:
-    """Tokenize a list of texts into a batch suitable for Transformer models."""
+    """Tokenize a list of texts into a batch suitable for Transformer models.
+
+    Args:
+        tokenizer: A Hugging Face tokenizer.
+        texts: Input texts to tokenize.
+        max_length: Maximum sequence length.
+
+    Returns:
+        A tokenized batch as returned by the underlying tokenizer.
+    """
     return tokenizer(
         texts,
         padding=True,
