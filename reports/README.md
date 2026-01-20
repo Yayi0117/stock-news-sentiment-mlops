@@ -337,7 +337,13 @@ We ensure reproducibility at multiple levels. First, we pin Python and package v
 >
 > Answer:
 
---- question 14 fill here ---
+As seen in the provided image, I have tracked several key metrics to monitor the training process:
+
+train_loss_total: This is the primary indicator of model convergence. The graph shows a sharp initial drop followed by a stable plateau, confirming that the model has effectively learned the features and reached a steady state.
+
+lr (Learning Rate): I monitored the learning rate, which remained constant at 0.0001. This is important to ensure the optimizer updates parameters at a predictable pace, maintaining training stability.
+
+These metrics inform us that the training environment is well-controlled, with the model reaching deep convergence through stable parameter updates.
 
 ### Question 15
 
@@ -375,7 +381,9 @@ The run writes artifacts to `models/finbert/small/`, including `metrics.json`, `
 >
 > Answer:
 
---- question 16 fill here ---
+For debugging, our approach was twofold. We primarily utilized interactive debugging within VS Code to set breakpoints and inspect tensor shapes during the training loop. Additionally, we relied heavily on W&B's real-time logging to detect anomalies, allowing us to catch bugs that only manifest after several thousand steps.
+
+Regarding profiling, we do not consider the code perfect. We attempted to use the PyTorch Profiler to optimize the num_workers setting for our data loading pipeline. However, the results were inconclusive, as increasing the number of workers did not yield a significant performance gain.
 
 ## Working in the cloud
 
@@ -512,7 +520,7 @@ The run writes artifacts to `models/finbert/small/`, including `metrics.json`, `
 >
 > Answer:
 
---- question 26 fill here ---
+We did not manage to fully implement monitoring, although we attempted to use Evidently for drift detection with inconclusive results. We would like to have monitoring implemented such that over time we could measure data drift and prediction confidence scores that would inform us about the performance decay or concept drift of our application.
 
 ## Overall discussion of project
 
