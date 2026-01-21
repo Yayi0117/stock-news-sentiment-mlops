@@ -278,7 +278,7 @@ def train(
         logging_steps=50,
         report_to=[],
         disable_tqdm=False,
-        fp16=true,
+        fp16=True,
     )
 
     run_config = RunConfig(
