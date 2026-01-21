@@ -337,7 +337,7 @@ We ensure reproducibility at multiple levels. First, we pin Python and package v
 >
 > Answer:
 
-As seen in the provided image, I have tracked several key metrics to monitor the training process:
+As seen in the provided [image](figures/q14_wandb.png), I have tracked several key metrics to monitor the training process:
 
 train_loss_total: This is the primary indicator of model convergence. The graph shows a sharp initial drop followed by a stable plateau, confirming that the model has effectively learned the features and reached a steady state.
 
