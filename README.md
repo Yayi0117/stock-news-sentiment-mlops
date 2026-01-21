@@ -177,6 +177,67 @@ docker run --rm \
   sns-mlops-train ...
 ```
 
+## Docker (GPU support)
+
+For GPU-accelerated training and inference, use the GPU-enabled Dockerfiles:
+
+### Build GPU images
+
+```bash
+docker build -f dockerfiles/train.dockerfile.gpu -t sns-mlops-train:gpu .
+docker build -f dockerfiles/api.dockerfile.gpu -t sns-mlops-api:gpu .
+```
+
+Windows PowerShell (equivalent):
+
+```powershell
+docker build -f dockerfiles/train.dockerfile.gpu -t sns-mlops-train:gpu .
+docker build -f dockerfiles/api.dockerfile.gpu -t sns-mlops-api:gpu .
+```
+
+### Run GPU training
+
+```bash
+docker run --gpus all --rm \
+  -v ./data/processed:/app/data/processed:ro \
+  -v ./models:/app/models \
+  sns-mlops-train:gpu \
+  --tier small --num-train-epochs 1 \
+  --max-train-samples 16 --max-eval-samples 16 --max-test-samples 16 \
+  --per-device-train-batch-size 4 --per-device-eval-batch-size 4 \
+  --no-save-checkpoints --no-save-model
+```
+
+Windows PowerShell (equivalent):
+
+```powershell
+docker run --gpus all --rm `
+  -v "${PWD}\data\processed:/app/data/processed:ro" `
+  -v "${PWD}\models:/app/models" `
+  sns-mlops-train:gpu `
+  --tier small --num-train-epochs 1 `
+  --max-train-samples 16 --max-eval-samples 16 --max-test-samples 16 `
+  --per-device-train-batch-size 4 --per-device-eval-batch-size 4 `
+  --no-save-checkpoints --no-save-model
+```
+
+### Run GPU API
+
+```bash
+docker run --gpus all --rm -p 8000:8000 sns-mlops-api:gpu
+```
+
+Windows PowerShell (equivalent):
+
+```powershell
+docker run --gpus all --rm -p 8000:8000 sns-mlops-api:gpu
+```
+
+**Requirements:**
+- NVIDIA GPU with CUDA support
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed
+- Docker with GPU support enabled
+
 ## Documentation (MkDocs)
 
 The documentation sources live under `docs/source/` and are built with

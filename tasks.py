@@ -67,6 +67,21 @@ def docker_build(ctx: Context, progress: str = "plain") -> None:
     )
 
 
+@task
+def docker_build_gpu(ctx: Context, progress: str = "plain") -> None:
+    """Build GPU-enabled docker images."""
+    ctx.run(
+        f"docker build -t train:gpu . -f dockerfiles/train.dockerfile.gpu --progress={progress}",
+        echo=True,
+        pty=not WINDOWS,
+    )
+    ctx.run(
+        f"docker build -t api:gpu . -f dockerfiles/api.dockerfile.gpu --progress={progress}",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
 # Documentation commands
 @task(dev_requirements)
 def build_docs(ctx: Context) -> None:
