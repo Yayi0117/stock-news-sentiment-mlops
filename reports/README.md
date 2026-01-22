@@ -479,7 +479,9 @@ We deliberately chose this CPU-based setup over a GPU instance for two reasons: 
 > *to the API to make it more ...*
 >
 > Answer:
+Yes, we implemented a robust REST API using **FastAPI** to serve our FinBERT sentiment model. The API features a POST `/predict` endpoint that takes text input and returns the predicted label, confidence score, and a full probability distribution. 
 
+A special feature of our implementation is the **hierarchical model loading strategy** integrated into the FastAPI `lifespan` event. The system automatically searches for the best available model on the local disk by checking three priority paths: `Full`, `Dev`, and `Small` (in that order). This ensures that the API always serves the highest-quality version of the model available in the deployment environment. Furthermore, we implemented a `lifespan` context manager to load the model and tokenizer into memory only once at startup, which minimizes inference latency for subsequent requests. We also included a `/health` endpoint to monitor the readiness of the model and its running device (CPU/GPU).
 --- question 23 fill here ---
 
 ### Question 24
