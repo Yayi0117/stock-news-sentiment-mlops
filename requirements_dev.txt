@@ -18,3 +18,7 @@ mkdocstrings-python==1.16.10
 
 # data versioning
 dvc==3.63.0
+
+# load testing
+httpx
+locust
