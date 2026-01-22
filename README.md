@@ -25,6 +25,29 @@ conda activate py312
 pip install -e .
 ```
 
+### GPU/CUDA 环境（本地）
+
+If you already have NVIDIA drivers and CUDA installed, use the GPU requirements file:
+
+```powershell
+conda create -y -n py312-gpu python=3.12
+conda activate py312-gpu
+pip install -r r-requirement_GPU_cuda.txt
+```
+
+Verify CUDA availability:
+
+```powershell
+python -c "import torch; print('CUDA Available:', torch.cuda.is_available()); print('Device Count:', torch.cuda.device_count())"
+```
+
+Run full dataset training (GPU):
+
+```powershell
+$env:PYTHONPATH="$PWD\src"
+python -m sns_mlops.train --tier full --processed-root "$PWD\data\processed" --output-dir "$PWD\models\finbert"
+```
+
 ### Build processed data (DVC)
 
 ```bash
