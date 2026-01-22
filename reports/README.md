@@ -425,7 +425,7 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **You can take inspiration from [this figure](figures/bucket.png).**
 >
 > Answer:
-![GCP Bucket Content](figures/bucket.png)
+![GCP Bucket Content](figures/q19_bucket.png)
 
 --- question 19 fill here ---
 
@@ -435,7 +435,7 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **stored. You can take inspiration from [this figure](figures/registry.png).**
 >
 > Answer:
-![Artifact Registry Content](figures/registry.png)
+![Artifact Registry Content](figures/q20_registry.png)
 --- question 20 fill here ---
 
 ### Question 21
@@ -444,8 +444,8 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **your project. You can take inspiration from [this figure](figures/build.png).**
 >
 > Answer:
-![Cloud Build History](figures/build.png)
---- question 21 fill here ---
+![Cloud Build History](figures/q21_build.png)
+
 
 ### Question 22
 
@@ -463,7 +463,7 @@ Yes, we successfully trained our model in the cloud using Google Compute Engine.
 
 We deliberately chose this CPU-based setup over a GPU instance for two reasons: First, our model is relatively small, and the performance on the CPU was satisfactory for our needs. Second, the CUDA-based GPU Docker images were extremely large, and we faced persistent timeouts and failures when attempting to push them to the Artifact Registry. Therefore, we opted for a lightweight CPU-only image to ensure a reliable and successful deployment pipeline.
 
---- question 22 fill here ---
+
 
 ## Deployment
 
@@ -482,7 +482,7 @@ We deliberately chose this CPU-based setup over a GPU instance for two reasons: 
 Yes, we implemented a robust REST API using FastAPI to serve our FinBERT sentiment model. The API features a POST `/predict` endpoint that takes text input and returns the predicted label, confidence score, and a full probability distribution. 
 
 A special feature of our implementation is the hierarchical model loading strategy integrated into the FastAPI `lifespan` event. The system automatically searches for the best available model on the local disk by checking three priority paths: `Full`, `Dev`, and `Small` (in that order). This ensures that the API always serves the highest-quality version of the model available in the deployment environment. Furthermore, we implemented a `lifespan` context manager to load the model and tokenizer into memory only once at startup, which minimizes inference latency for subsequent requests. We also included a `/health` endpoint to monitor the readiness of the model and its running device (CPU/GPU).
---- question 23 fill here ---
+
 
 ### Question 24
 
@@ -507,7 +507,9 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{ "text": "The company reported a significant increase in quarterly revenue." }'
---- question 24 fill here ---
+
+```
+
 
 ### Question 25
 
@@ -521,8 +523,7 @@ curl -X 'POST' \
 > *before the service crashed.*
 >
 > Answer:
-
---- question 25 fill here ---
+For unit testing, we used **FastAPI's TestClient** together with **pytest** to verify the functionality of our endpoints, including root connectivity, health check status, and prediction logic for both valid and invalid inputs. For load testing, we used **Locust** to simulate concurrent users making requests to our deployed service. The load testing results showed that the API successfully handled an aggregate of **6 requests per second (RPS)** with **zero failures**. For the core `/predict` endpoint, the median response time was **150ms** and the 95th percentile was **380ms**, confirming that our serverless deployment on Cloud Run remains stable and responsive under concurrent traffic.![Locust Load Test](figures/q25_locust_results.png)
 
 ### Question 26
 
