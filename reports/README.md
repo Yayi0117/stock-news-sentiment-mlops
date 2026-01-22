@@ -417,8 +417,6 @@ We used the following services: Compute Engine, Cloud Storage, Artifact Registry
 > Answer:
 We used the compute engine to run our model training workload in the cloud. We used instances with the following hardware: an `e2-standard-4` machine type (4 vCPUs, 16 GB memory), located in the `asia-east2-a` zone. We started the training by SSH-ing into the instance (`sns-mlops-vm`) and running our custom docker container `sns-mlops-train` which we pulled from the Artifact Registry.
 
---- question 18 fill here ---
-
 ### Question 19
 
 > **Insert 1-2 images of your GCP bucket, such that we can see what data you have stored in it.**
