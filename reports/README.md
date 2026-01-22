@@ -399,6 +399,7 @@ Regarding profiling, we do not consider the code perfect. We attempted to use th
 > *We used the following two services: Engine and Bucket. Engine is used for... and Bucket is used for...*
 >
 > Answer:
+We used the following services: Compute Engine, Cloud Storage, Artifact Registry, Cloud Build, and Cloud Run. Compute Engine is used for provisioning the Virtual Machine (VM) where we executed our training container. Cloud Storage is used as the remote backend for DVC to store our data and model artifacts. Artifact Registry is used for hosting our docker images, and Cloud Build is used for automatically building these images. Finally, Cloud Run is used for deploying our inference API as a serverless application.
 
 --- question 17 fill here ---
 
@@ -414,6 +415,7 @@ Regarding profiling, we do not consider the code perfect. We attempted to use th
 > *using a custom container: ...*
 >
 > Answer:
+We used the compute engine to run our model training workload in the cloud. We used instances with the following hardware: an `e2-standard-4` machine type (4 vCPUs, 16 GB memory), located in the `asia-east2-a` zone. We started the training by SSH-ing into the instance (`sns-mlops-vm`) and running our custom docker container `sns-mlops-train` which we pulled from the Artifact Registry.
 
 --- question 18 fill here ---
 
