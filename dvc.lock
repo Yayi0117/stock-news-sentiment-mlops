@@ -18,95 +18,95 @@ stages:
       hash: md5
       files:
       - relpath: metadata.json
-        md5: a1523d257364e1b2595d5a2f7063ece9
+        md5: 9a8051469d9beec6cfca0d1acb0edac8
         size: 1920
         cloud:
           remote_storage:
-            etag: 08e6b090f0849d92031001
-            version_id: '1769012438767718'
+            etag: 0893cbebbdb99f92031001
+            version_id: '1769095279863187'
       - relpath: test.parquet
         md5: 114b36e477c6532d6e7bb5f70f614d59
         size: 385800
         cloud:
           remote_storage:
-            etag: 08aedbfbef849d92031001
-            version_id: '1769012438429102'
+            etag: 08f2d2fbbdb99f92031001
+            version_id: '1769095280126322'
       - relpath: train.parquet
         md5: 5f741cef07da907e635792c4fd697b1c
         size: 3116387
         cloud:
           remote_storage:
-            etag: 08e092bdf0849d92031001
-            version_id: '1769012439501152'
+            etag: 08c4f7bbbeb99f92031001
+            version_id: '1769095281179588'
       - relpath: val.parquet
         md5: 9b5964e422ff13112a2c90b12544bee3
         size: 398942
         cloud:
           remote_storage:
-            etag: 08c2e4e7ef849d92031001
-            version_id: '1769012438102594'
+            etag: 08acd9f6bdb99f92031001
+            version_id: '1769095280045228'
     - path: data/processed/full
       hash: md5
       files:
       - relpath: metadata.json
-        md5: 8921801c641069acfae17540512eb685
+        md5: ec2d23afa03ab3ff54ac5ea783e388a5
         size: 1923
         cloud:
           remote_storage:
-            etag: 08f4ba92f0849d92031001
-            version_id: '1769012438801780'
+            etag: 0884d4ebbdb99f92031001
+            version_id: '1769095279864324'
       - relpath: test.parquet
         md5: 25f6ede473cf5a410a449b883e53c568
         size: 3888476
         cloud:
           remote_storage:
-            etag: 089e96f2f0849d92031001
-            version_id: '1769012440369950'
+            etag: 08e0fcbdbeb99f92031001
+            version_id: '1769095281213024'
       - relpath: train.parquet
         md5: 83221c8581fda2e32fe84a9bc68d41c6
         size: 30798951
         cloud:
           remote_storage:
-            etag: 08b095f7f2849d92031001
-            version_id: '1769012444646064'
+            etag: 08aed9e3c0b99f92031001
+            version_id: '1769095286025390'
       - relpath: val.parquet
         md5: c94bd9b10c3a8dc23ed7abcc0c1b6e8b
         size: 3864470
         cloud:
           remote_storage:
-            etag: 08d0a5f6f0849d92031001
-            version_id: '1769012440437456'
+            etag: 0880dbe4beb99f92031001
+            version_id: '1769095281847680'
     - path: data/processed/small
       hash: md5
       files:
       - relpath: metadata.json
-        md5: 45aadff1782e1beabbca678b5163afdf
+        md5: 4c96ccd563f2cabe88c1813320dc2166
         size: 1919
         cloud:
           remote_storage:
-            etag: 08c0ad91f0849d92031001
-            version_id: '1769012438783680'
+            etag: 08eb81cabdb99f92031001
+            version_id: '1769095279313131'
       - relpath: test.parquet
         md5: 9444a1386787e4678a9fd4bffa4bc47e
         size: 79348
         cloud:
           remote_storage:
-            etag: 08eeee9bf0849d92031001
-            version_id: '1769012438955886'
+            etag: 088dbbe1bdb99f92031001
+            version_id: '1769095279697293'
       - relpath: train.parquet
         md5: 7548965ce6beae721ad0ad21782eb353
         size: 624127
         cloud:
           remote_storage:
-            etag: 08eda2a3f0849d92031001
-            version_id: '1769012439077229'
+            etag: 089bfdffbdb99f92031001
+            version_id: '1769095280197275'
       - relpath: val.parquet
         md5: 43850bff8fa66a4dca0a216a4a6e18aa
         size: 82172
         cloud:
           remote_storage:
-            etag: 0893e996f0849d92031001
-            version_id: '1769012438873235'
+            etag: 08b1caeebdb99f92031001
+            version_id: '1769095279912241'
   train:
     cmd: python -m sns_mlops.train --tier small --processed-root data/processed 
       --output-dir models/finbert --seed 42 --num-train-epochs 1 --max-length 64

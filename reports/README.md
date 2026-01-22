@@ -479,9 +479,9 @@ We deliberately chose this CPU-based setup over a GPU instance for two reasons: 
 > *to the API to make it more ...*
 >
 > Answer:
-Yes, we implemented a robust REST API using **FastAPI** to serve our FinBERT sentiment model. The API features a POST `/predict` endpoint that takes text input and returns the predicted label, confidence score, and a full probability distribution. 
+Yes, we implemented a robust REST API using FastAPI to serve our FinBERT sentiment model. The API features a POST `/predict` endpoint that takes text input and returns the predicted label, confidence score, and a full probability distribution. 
 
-A special feature of our implementation is the **hierarchical model loading strategy** integrated into the FastAPI `lifespan` event. The system automatically searches for the best available model on the local disk by checking three priority paths: `Full`, `Dev`, and `Small` (in that order). This ensures that the API always serves the highest-quality version of the model available in the deployment environment. Furthermore, we implemented a `lifespan` context manager to load the model and tokenizer into memory only once at startup, which minimizes inference latency for subsequent requests. We also included a `/health` endpoint to monitor the readiness of the model and its running device (CPU/GPU).
+A special feature of our implementation is the hierarchical model loading strategy integrated into the FastAPI `lifespan` event. The system automatically searches for the best available model on the local disk by checking three priority paths: `Full`, `Dev`, and `Small` (in that order). This ensures that the API always serves the highest-quality version of the model available in the deployment environment. Furthermore, we implemented a `lifespan` context manager to load the model and tokenizer into memory only once at startup, which minimizes inference latency for subsequent requests. We also included a `/health` endpoint to monitor the readiness of the model and its running device (CPU/GPU).
 --- question 23 fill here ---
 
 ### Question 24
@@ -497,7 +497,16 @@ A special feature of our implementation is the **hierarchical model loading stra
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
 > Answer:
+Yes, we successfully deployed our API both locally and in the cloud using **Google Cloud Run**. For the cloud deployment, we packaged our FastAPI application into a Docker container, pushed it to the **Artifact Registry**, and deployed it as a serverless service. 
 
+We chose Cloud Run because it automatically handles scaling and provides a public HTTPS endpoint. To invoke the service, a user can send a POST request to our live endpoint using `curl`. For example:
+
+```bash
+curl -X 'POST' \
+  '[https://sns-mlops-api-593564032726.asia-east2.run.app/predict](https://sns-mlops-api-593564032726.asia-east2.run.app/predict)' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{ "text": "The company reported a significant increase in quarterly revenue." }'
 --- question 24 fill here ---
 
 ### Question 25
