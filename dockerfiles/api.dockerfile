@@ -43,5 +43,5 @@ COPY src/ src/
 COPY README.md README.md
 COPY pyproject.toml pyproject.toml
 
-
+COPY models/ /app/models/
 ENTRYPOINT ["uvicorn", "sns_mlops.api:app", "--host", "0.0.0.0", "--port", "8000"]
