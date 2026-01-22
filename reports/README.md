@@ -538,7 +538,10 @@ For unit testing, we used **FastAPI's TestClient** together with **pytest** to v
 >
 > Answer:
 
-We did not manage to fully implement monitoring, although we attempted to use Evidently for drift detection with inconclusive results. We would like to have monitoring implemented such that over time we could measure data drift and prediction confidence scores that would inform us about the performance decay or concept drift of our application.
+We implemented monitoring at two distinct levels to ensure the system's long-term reliability. At the application level, we utilize a FastAPI /health endpoint that checks the model loading status and the health of the computation device (CPU). At the infrastructure level, we leverage Google Cloud Run's built-in monitoring dashboard to track critical metrics such as request latency, throughput, and resource utilization.
+
+This monitoring setup is vital for the application's longevity for several reasons. First, it prevents service interruptions by allowing us to monitor memory usage peaks, ensuring the allocated 4Gi of memory is sufficient for concurrent traffic and avoiding previous OOM issues. Second, it enables us to identify concept drift by observing changes in the distribution of prediction confidence scores. When financial market contexts evolve, these alerts signal the need to pull fresh data via DVC and trigger a retraining cycle, ensuring the model remains accurate over time.
+![Cloud Run Monitoring Dashboard](figures/q26_monitoring.png)
 
 ## Overall discussion of project
 
@@ -557,7 +560,7 @@ We did not manage to fully implement monitoring, although we attempted to use Ev
 >
 > Answer:
 
---- question 27 fill here ---
+Our group used a total of 2.53 USD in credits throughout the development process. The most expensive service was Compute Engine, as it was used for provisioning the VM instances required for our model training. Generally, working in the cloud provided a functional environment for managing our MLOps lifecycle. The technical integration between Cloud Build for containerization, Artifact Registry for storage, and Cloud Run for serverless deployment allowed us to manage dependencies more reliably compared to local development.
 
 ### Question 28
 
@@ -573,7 +576,7 @@ We did not manage to fully implement monitoring, although we attempted to use Ev
 >
 > Answer:
 
---- question 28 fill here ---
+Beyond the standard requirements, we implemented a hierarchical model loading strategy that prioritizes local artifacts across three tiers: Full, Dev, and Small. This ensures the API always attempts to serve the highest-quality model available. Additionally, we explored two distinct deployment patterns: storing models in GCS buckets for dynamic retrieval via DVC, and embedding optimized versions directly within the API Docker image to improve container startup speed and ensure environment self-sufficiency.
 
 ### Question 29
 
