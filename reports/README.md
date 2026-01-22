@@ -401,7 +401,7 @@ Regarding profiling, we do not consider the code perfect. We attempted to use th
 > Answer:
 We used the following services: Compute Engine, Cloud Storage, Artifact Registry, Cloud Build, and Cloud Run. Compute Engine is used for provisioning the Virtual Machine (VM) where we executed our training container. Cloud Storage is used as the remote backend for DVC to store our data and model artifacts. Artifact Registry is used for hosting our docker images, and Cloud Build is used for automatically building these images. Finally, Cloud Run is used for deploying our inference API as a serverless application.
 
---- question 17 fill here ---
+
 
 ### Question 18
 
@@ -427,7 +427,7 @@ We used the compute engine to run our model training workload in the cloud. We u
 > Answer:
 ![GCP Bucket Content](figures/q19_bucket.png)
 
---- question 19 fill here ---
+
 
 ### Question 20
 
@@ -436,7 +436,7 @@ We used the compute engine to run our model training workload in the cloud. We u
 >
 > Answer:
 ![Artifact Registry Content](figures/q20_registry.png)
---- question 20 fill here ---
+
 
 ### Question 21
 
