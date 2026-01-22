@@ -425,6 +425,7 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **You can take inspiration from [this figure](figures/bucket.png).**
 >
 > Answer:
+![GCP Bucket Content](figures/bucket.png)
 
 --- question 19 fill here ---
 
@@ -434,7 +435,7 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **stored. You can take inspiration from [this figure](figures/registry.png).**
 >
 > Answer:
-
+![Artifact Registry Content](figures/registry.png)
 --- question 20 fill here ---
 
 ### Question 21
@@ -443,7 +444,7 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **your project. You can take inspiration from [this figure](figures/build.png).**
 >
 > Answer:
-
+![Cloud Build History](figures/build.png)
 --- question 21 fill here ---
 
 ### Question 22
@@ -458,6 +459,9 @@ We used the compute engine to run our model training workload in the cloud. We u
 > *was because ...*
 >
 > Answer:
+Yes, we successfully trained our model in the cloud using Google Compute Engine. We provisioned an `e2-standard-4` virtual machine instance in the `asia-east2-a` zone. After connecting to the instance via SSH, we first executed `dvc pull` to download our training data directly from the Google Cloud Storage bucket. Then, we pulled our custom training docker image (`sns-mlops-train`) from the Artifact Registry and executed the training command.
+
+We deliberately chose this CPU-based setup over a GPU instance for two reasons: First, our model is relatively small, and the performance on the CPU was satisfactory for our needs. Second, the CUDA-based GPU Docker images were extremely large, and we faced persistent timeouts and failures when attempting to push them to the Artifact Registry. Therefore, we opted for a lightweight CPU-only image to ensure a reliable and successful deployment pipeline.
 
 --- question 22 fill here ---
 
