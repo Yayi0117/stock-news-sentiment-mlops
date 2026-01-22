@@ -116,8 +116,7 @@ will check the repositories and the code to verify your answers.
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
 > Answer:
-
---- question 1 fill here ---
+GROUP 14
 
 ### Question 2
 >
@@ -128,6 +127,7 @@ will check the repositories and the code to verify your answers.
 > *sXXXXXX, sXXXXXX, sXXXXXX*
 >
 > Answer:
+> s250181
 
 --- question 2 fill here ---
 
@@ -144,7 +144,6 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 3 fill here ---
 
 We used Hugging Face Transformers as the main third-party framework beyond the course core tooling. Transformers provides the `Trainer` abstraction, pretrained model loading, tokenization, and model export, which allowed us to focus on MLOps engineering quality rather than writing and debugging a custom PyTorch training loop. We also used the Hugging Face Datasets library to standardize data loading and Parquet materialization, which integrates well with deterministic splits and DVC-based reproducibility. Together, these libraries reduced boilerplate, improved maintainability, and made it straightforward to create reproducible run artifacts (`run_config.json`, `metrics.json`, and `train.log`).
 
@@ -182,7 +181,6 @@ We manage dependencies using a Conda environment defined in `environment.yml` (n
 >
 > Answer:
 
---- question 5 fill here ---
 
 We initialized the repository from the official cookiecutter MLOps template and kept the overall structure. We filled out the core project modules under `src/sns_mlops/`, focusing on a reproducible data pipeline (`data.py`), FinBERT model construction (`model.py`), and a Trainer-based training entrypoint (`train.py`). We added unit tests under `tests/` covering data, model configuration, and the training artifact contract. For reproducibility and artifact tracking, we enabled DVC and defined `data` and `train` stages in `dvc.yaml`. We also kept the provided documentation skeleton under `docs/` (MkDocs + Material) and added pages describing how to run the pipeline. Finally, we added a CPU-only training Dockerfile under `dockerfiles/` to make training runnable in a container.
 
@@ -199,7 +197,6 @@ We initialized the repository from the official cookiecutter MLOps template and 
 >
 > Answer:
 
---- question 6 fill here ---
 
 We enforce code quality and consistent formatting using ruff (`ruff check .` and `ruff format --check .`) configured in `pyproject.toml`, and we run these checks in CI. Locally, we use pre-commit hooks (`.pre-commit-config.yaml`) to run ruff and basic sanity checks (YAML/JSON validation, trailing whitespace fixes) before commits. We use type hints in the core pipeline and provide docstrings for the key modules and entrypoints; in addition, we maintain MkDocs-based project documentation to make the pipeline runnable by new team members. These practices matter in larger projects because they reduce ambiguity, prevent style drift, catch errors early, and make collaboration and long-term maintenance feasible.
 
@@ -250,7 +247,6 @@ Our current total code coverage is 70% for the `sns_mlops` package (measured wit
 >
 > Answer:
 
---- question 9 fill here ---
 
 Yes. We work on feature branches and merge changes through pull requests into the default branch (`master`). Each pull request triggers GitHub Actions workflows for unit tests, coverage, and linting, which provides a clear quality gate before merging. This workflow helps the team collaborate safely by keeping changes reviewable and by ensuring that the main branch remains in a runnable state. As a next step, we can add GitHub branch protection rules to require status checks to pass and at least one approval before merging.
 
@@ -590,7 +586,7 @@ Beyond the standard requirements, we implemented a hierarchical model loading st
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
 >
 > Answer:
-
+--- question 29 fill here ---
 (https://github.com/Yayi0117/stock-news-sentiment-mlops)
 
 ### Question 30
