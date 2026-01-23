@@ -395,6 +395,7 @@ Regarding profiling, we do not consider the code perfect. We attempted to use th
 > *We used the following two services: Engine and Bucket. Engine is used for... and Bucket is used for...*
 >
 > Answer:
+
 We used the following services: Compute Engine, Cloud Storage, Artifact Registry, Cloud Build, and Cloud Run. Compute Engine is used for provisioning the Virtual Machine (VM) where we executed our training container. Cloud Storage is used as the remote backend for DVC to store our data and model artifacts. Artifact Registry is used for hosting our docker images, and Cloud Build is used for automatically building these images. Finally, Cloud Run is used for deploying our inference API as a serverless application.
 
 
@@ -411,6 +412,7 @@ We used the following services: Compute Engine, Cloud Storage, Artifact Registry
 > *using a custom container: ...*
 >
 > Answer:
+
 We used the compute engine to run our model training workload in the cloud. We used instances with the following hardware: an `e2-standard-4` machine type (4 vCPUs, 16 GB memory), located in the `asia-east2-a` zone. We started the training by SSH-ing into the instance (`sns-mlops-vm`) and running our custom docker container `sns-mlops-train` which we pulled from the Artifact Registry.
 
 ### Question 19
@@ -419,6 +421,8 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **You can take inspiration from [this figure](figures/bucket.png).**
 >
 > Answer:
+
+The results are shown in the figure below:
 ![GCP Bucket Content](figures/q19_bucket.png)
 
 
@@ -429,6 +433,8 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **stored. You can take inspiration from [this figure](figures/registry.png).**
 >
 > Answer:
+
+The results are shown in the figure below:
 ![Artifact Registry Content](figures/q20_registry.png)
 
 
@@ -438,6 +444,8 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **your project. You can take inspiration from [this figure](figures/build.png).**
 >
 > Answer:
+
+The results are shown in the figure below:
 ![Cloud Build History](figures/q21_build.png)
 
 
@@ -453,6 +461,7 @@ We used the compute engine to run our model training workload in the cloud. We u
 > *was because ...*
 >
 > Answer:
+
 Yes, we successfully trained our model in the cloud using Google Compute Engine. We provisioned an `e2-standard-4` virtual machine instance in the `asia-east2-a` zone. After connecting to the instance via SSH, we first executed `dvc pull` to download our training data directly from the Google Cloud Storage bucket. Then, we pulled our custom training docker image (`sns-mlops-train`) from the Artifact Registry and executed the training command.
 
 We deliberately chose this CPU-based setup over a GPU instance for two reasons: First, our model is relatively small, and the performance on the CPU was satisfactory for our needs. Second, the CUDA-based GPU Docker images were extremely large, and we faced persistent timeouts and failures when attempting to push them to the Artifact Registry. Therefore, we opted for a lightweight CPU-only image to ensure a reliable and successful deployment pipeline.
@@ -473,6 +482,7 @@ We deliberately chose this CPU-based setup over a GPU instance for two reasons: 
 > *to the API to make it more ...*
 >
 > Answer:
+
 Yes, we implemented a robust REST API using FastAPI to serve our FinBERT sentiment model. The API features a POST `/predict` endpoint that takes text input and returns the predicted label, confidence score, and a full probability distribution. 
 
 A special feature of our implementation is the hierarchical model loading strategy integrated into the FastAPI `lifespan` event. The system automatically searches for the best available model on the local disk by checking three priority paths: `Full`, `Dev`, and `Small` (in that order). This ensures that the API always serves the highest-quality version of the model available in the deployment environment. Furthermore, we implemented a `lifespan` context manager to load the model and tokenizer into memory only once at startup, which minimizes inference latency for subsequent requests. We also included a `/health` endpoint to monitor the readiness of the model and its running device (CPU/GPU).
@@ -491,6 +501,7 @@ A special feature of our implementation is the hierarchical model loading strate
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
 > Answer: 
+
 Yes, we successfully deployed our API both locally and in the cloud using **Google Cloud Run**. For the cloud deployment, we packaged our FastAPI application into a Docker container, pushed it to the **Artifact Registry**, and deployed it as a serverless service. 
 
 We chose Cloud Run because it automatically handles scaling and provides a public HTTPS endpoint. To invoke the service, a user can send a POST request to our live endpoint using `curl`. For example:
@@ -518,7 +529,9 @@ curl -X 'POST' \
 >
 > Answer:
 
-For unit testing, we used **FastAPI's TestClient** together with **pytest** to verify the functionality of our endpoints, including root connectivity, health check status, and prediction logic for both valid and invalid inputs. For load testing, we used **Locust** to simulate concurrent users making requests to our deployed service. The load testing results showed that the API successfully handled an aggregate of **6 requests per second (RPS)** with **zero failures**. For the core `/predict` endpoint, the median response time was **150ms** and the 95th percentile was **380ms**, confirming that our serverless deployment on Cloud Run remains stable and responsive under concurrent traffic. ![Locust Load Test](figures/q25_locust_results.png)
+For unit testing, we used **FastAPI's TestClient** together with **pytest** to verify the functionality of our endpoints, including root connectivity, health check status, and prediction logic for both valid and invalid inputs. For load testing, we used **Locust** to simulate concurrent users making requests to our deployed service. The load testing results showed that the API successfully handled an aggregate of **6 requests per second (RPS)** with **zero failures**. For the core `/predict` endpoint, the median response time was **150ms** and the 95th percentile was **380ms**, confirming that our serverless deployment on Cloud Run remains stable and responsive under concurrent traffic. 
+
+![Locust Load Test](figures/q25_locust_results.png)
 
 ### Question 26
 
@@ -536,6 +549,7 @@ For unit testing, we used **FastAPI's TestClient** together with **pytest** to v
 We implemented monitoring at two distinct levels to ensure the system's long-term reliability. At the application level, we utilize a FastAPI /health endpoint that checks the model loading status and the health of the computation device (CPU). At the infrastructure level, we leverage Google Cloud Run's built-in monitoring dashboard to track critical metrics such as request latency, throughput, and resource utilization.
 
 This monitoring setup is vital for the application's longevity for several reasons. First, it prevents service interruptions by allowing us to monitor memory usage peaks, ensuring the allocated 4Gi of memory is sufficient for concurrent traffic and avoiding previous OOM issues. Second, it enables us to identify concept drift by observing changes in the distribution of prediction confidence scores. When financial market contexts evolve, these alerts signal the need to pull fresh data via DVC and trigger a retraining cycle, ensuring the model remains accurate over time.
+
 ![Cloud Run Monitoring Dashboard](figures/q26_monitoring.png)
 
 ## Overall discussion of project
@@ -585,11 +599,13 @@ Beyond the standard requirements, we implemented a hierarchical model loading st
 >
 > *The starting point of the diagram is our local setup, where we integrated ... and ... and ... into our code.*
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
-
 > Answer:
 
-![Cloud Run Monitoring Dashboard](figures/q29_workflow.png)
-(https://github.com/Yayi0117/stock-news-sentiment-mlops)
+The figure illustrates the overall cloud architecture of our system. Source code is hosted on GitHub, while GitHub Actions provides the CI/CD pipeline. On Google Cloud Platform we use Google Cloud Build, Artifact Registry, Cloud Run and Cloud Storage as the core managed services. The developer writes and tests machine learning code locally or in a dev environment and stores datasets and model checkpoints in Cloud Storage. After passing pre-commit checks, code is pushed to GitHub, and pushes or pull requests trigger a GitHub Actions workflow.
+
+Once triggered, GitHub Actions submits a build job to Google Cloud Build. Cloud Build uses the repository’s Docker configuration to build two container images, a training image and an inference API image. These images are then pushed to Artifact Registry with proper versioning. For training, a Cloud Run service pulls the training image from Artifact Registry, loads training data and runs the training process inside a container, writing the resulting model weights back to Cloud Storage. For inference, another Cloud Run service pulls the inference image, loads the latest weights from Cloud Storage at startup and exposes an HTTP API endpoint. End users interact with this API, Cloud Run executes the model for each request and returns predictions.
+
+![System Architecture](figures/q29_workflow.png)
 
 ### Question 30
 
