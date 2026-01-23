@@ -62,6 +62,10 @@ def test_predict_uses_dummy_model(monkeypatch):
     def fake_loader(model_name_or_path: str):
         return DummyTokenizer(), DummyModel(), "cpu"
 
+    # CI runs with Hugging Face offline flags enabled. Make the API select a non-default
+    # model source so `ensure_model_loaded()` does not fail before calling our fake loader.
+    monkeypatch.setenv("SNS_MLOPS_MODEL_DIR", "dummy")
+
     monkeypatch.setattr(api, "_load_model_components", fake_loader)
     api.ml_models.clear()
 
