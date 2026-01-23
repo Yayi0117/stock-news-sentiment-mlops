@@ -79,35 +79,35 @@ will check the repositories and the code to verify your answers.
 * [x] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
-* [√] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
-* [√] Create a trigger workflow for automatically building your docker images (M21)
-* [√] Get your model training in GCP using either the Engine or Vertex AI (M21)
-* [√] Create a FastAPI application that can do inference using your model (M22)
-* [√] Deploy your model in GCP using either Functions or Run as the backend (M23)
-* [√] Write API tests for your application and setup continues integration for these (M24)
-* [√] Load test your application (M24)
+* [x] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
+* [x] Create a trigger workflow for automatically building your docker images (M21)
+* [x] Get your model training in GCP using either the Engine or Vertex AI (M21)
+* [x] Create a FastAPI application that can do inference using your model (M22)
+* [x] Deploy your model in GCP using either Functions or Run as the backend (M23)
+* [x] Write API tests for your application and setup continues integration for these (M24)
+* [x] Load test your application (M24)
 * [ ] Create a more specialized ML-deployment API using either ONNX or BentoML, or both (M25)
 * [ ] Create a frontend for your API (M26)
 
 ### Week 3
 
-* [√] Check how robust your model is towards data drifting (M27)
+* [x] Check how robust your model is towards data drifting (M27)
 * [ ] Deploy to the cloud a drift detection API (M27)
-* [√] Instrument your API with a couple of system metrics (M28)
+* [x] Instrument your API with a couple of system metrics (M28)
 * [ ] Setup cloud monitoring of your instrumented application (M28)
 * [ ] Create one or more alert systems in GCP to alert you if your app is not behaving correctly (M28)
 * [ ] If applicable, optimize the performance of your data loading using distributed data loading (M29)
 * [ ] If applicable, optimize the performance of your training pipeline by using distributed training (M30)
-* [√] Play around with quantization, compilation and pruning for you trained models to increase inference speed (M31)
+* [x] Play around with quantization, compilation and pruning for you trained models to increase inference speed (M31)
 
 ### Extra
 
-* [ ] Write some documentation for your application (M32)
-* [ ] Publish the documentation to GitHub Pages (M32)
-* [ ] Revisit your initial project description. Did the project turn out as you wanted?
-* [ ] Create an architectural diagram over your MLOps pipeline
-* [ ] Make sure all group members have an understanding about all parts of the project
-* [ ] Uploaded all your code to GitHub
+* [x] Write some documentation for your application (M32)
+* [x] Publish the documentation to GitHub Pages (M32)
+* [x] Revisit your initial project description. Did the project turn out as you wanted?
+* [x] Create an architectural diagram over your MLOps pipeline
+* [x] Make sure all group members have an understanding about all parts of the project
+* [x] Uploaded all your code to GitHub
 
 ## Group information
 
@@ -128,7 +128,6 @@ Group 14
 > *sXXXXXX, sXXXXXX, sXXXXXX*
 >
 > Answer:
-> s250181
 
 s243559, s250109, s242625, s250181
 
@@ -144,7 +143,9 @@ s243559, s250109, s242625, s250181
 > *package to do ... and ... in our project*.
 >
 > Answer:
+
 We used Hugging Face Transformers as the main third-party framework beyond the course core tooling. Transformers provides the `Trainer` abstraction, pretrained model loading, tokenization, and model export, which allowed us to focus on MLOps engineering quality rather than writing and debugging a custom PyTorch training loop. We also used the Hugging Face Datasets library to standardize data loading and Parquet materialization, which integrates well with deterministic splits and DVC-based reproducibility. Together, these libraries reduced boilerplate, improved maintainability, and made it straightforward to create reproducible run artifacts (`run_config.json`, `metrics.json`, and `train.log`).
+In practice, the framework helped us in three concrete areas: (1) reliable tokenization and batching via `AutoTokenizer` and `DataCollatorWithPadding`, (2) standardized fine-tuning and evaluation through `Trainer` and `TrainingArguments`, and (3) consistent model export by saving a self-contained `model/` directory that the API can load without custom glue code. This made our pipeline easier to test in CI (we can mock the model components without downloading weights) and easier to reproduce across machines.
 
 ## Coding environment
 
@@ -165,6 +166,7 @@ We used Hugging Face Transformers as the main third-party framework beyond the c
 > Answer:
 
 We manage dependencies using a Conda environment defined in `environment.yml` (named `py312`). The environment pins Python 3.12 and installs all Python packages via pip from `requirements.txt` (runtime dependencies) and `requirements_dev.txt` (development tools such as pytest, ruff, mkdocs, and dvc). To recreate the exact environment on a new machine, a team member can run `conda env create -f environment.yml`, then `conda activate py312`, and finally `pip install -e .` to install the project package in editable mode. We keep strict version pins in the requirements files to make installs deterministic across machines and over time.
+For day-to-day development we use `ruff` for linting and formatting, `pytest` for unit tests, and `pre-commit` to run the same checks before each commit. A new team member can validate the environment by running `ruff check .`, `ruff format --check .`, and `pytest -q`. This setup keeps the runtime dependencies minimal (only what is needed to run data processing, training, and the API) while isolating developer tooling in the dev requirements file.
 
 ### Question 5
 
@@ -179,6 +181,7 @@ We manage dependencies using a Conda environment defined in `environment.yml` (n
 > *experiments.*
 >
 > Answer:
+
 We initialized the repository from the official cookiecutter MLOps template and kept the overall structure. We filled out the core project modules under `src/sns_mlops/`, focusing on a reproducible data pipeline (`data.py`), FinBERT model construction (`model.py`), and a Trainer-based training entrypoint (`train.py`). We added unit tests under `tests/` covering data, model configuration, and the training artifact contract. For reproducibility and artifact tracking, we enabled DVC and defined `data` and `train` stages in `dvc.yaml`. We also kept the provided documentation skeleton under `docs/` (MkDocs + Material) and added pages describing how to run the pipeline. Finally, we added a CPU-only training Dockerfile under `dockerfiles/` to make training runnable in a container.
 
 ### Question 6
@@ -193,6 +196,7 @@ We initialized the repository from the official cookiecutter MLOps template and 
 > *concepts are important in larger projects because ... . For example, typing ...*
 >
 > Answer:
+
 We enforce code quality and consistent formatting using ruff (`ruff check .` and `ruff format --check .`) configured in `pyproject.toml`, and we run these checks in CI. Locally, we use pre-commit hooks (`.pre-commit-config.yaml`) to run ruff and basic sanity checks (YAML/JSON validation, trailing whitespace fixes) before commits. We use type hints in the core pipeline and provide docstrings for the key modules and entrypoints; in addition, we maintain MkDocs-based project documentation to make the pipeline runnable by new team members. These practices matter in larger projects because they reduce ambiguity, prevent style drift, catch errors early, and make collaboration and long-term maintenance feasible.
 
 ## Version control
@@ -241,7 +245,9 @@ Our current total code coverage is 70% for the `sns_mlops` package (measured wit
 > *addition to the main branch. To merge code we ...*
 >
 > Answer:
+
 Yes. We work on feature branches and merge changes through pull requests into the default branch (`master`). Each pull request triggers GitHub Actions workflows for unit tests, coverage, and linting, which provides a clear quality gate before merging. This workflow helps the team collaborate safely by keeping changes reviewable and by ensuring that the main branch remains in a runnable state. As a next step, we can add GitHub branch protection rules to require status checks to pass and at least one approval before merging.
+We typically scope each branch to one change (e.g., data pipeline, training artifacts, or CI configuration) and use the PR description to document reproducibility commands and expected outputs. When conflicts occur, we resolve them on the feature branch by merging `master` (not rebasing) to keep history simple and to make CI debugging easier. Overall, PR-based development reduced integration risk and made it straightforward to identify which change introduced a regression.
 
 ### Question 10
 
@@ -257,6 +263,7 @@ Yes. We work on feature branches and merge changes through pull requests into th
 > Answer:
 
 Yes. We use DVC to manage the reproducibility of our data preprocessing pipeline. After initializing DVC with `dvc init`, we define a `data` stage in `dvc.yaml` that runs `python src/sns_mlops/data.py ...` and declares `data/processed/small`, `data/processed/dev`, and `data/processed/full` as stage outputs. Running `dvc repro data` regenerates the processed datasets and produces a `dvc.lock` file, which records the exact command, code dependencies, and hashes of the outputs. This setup makes it easy to reproduce the same processed data artifacts from code, and it keeps large generated files out of Git history while still being tracked by DVC.
+In addition, we keep a lightweight `data/raw/` cache to avoid repeated downloads from Hugging Face when the dataset source is unchanged. For training, we use a separate `train` stage to produce small, versioned run artifacts such as `models/finbert/<tier>/metrics.json`, `run_config.json`, and `train.log`. We intentionally do not track the full model weights in DVC to avoid large storage costs; instead, the weights are produced deterministically from the pinned code, dependencies, and data artifacts.
 
 ### Question 11
 
@@ -326,13 +333,10 @@ We ensure reproducibility at multiple levels. First, we pin Python and package v
 >
 > Answer:
 
-As seen in the provided [image](figures/q14_wandb.png), I have tracked several key metrics to monitor the training process:
+As seen in the provided screenshot ![W&B run](figures/q14_wandb.png), we used Weights & Biases to track the most important signals from our Transformer fine-tuning runs. The primary metric we monitor is training loss, which tells us whether optimization is progressing and whether the chosen learning rate is stable. We also track validation metrics computed at the end of each epoch: accuracy and macro-F1. Accuracy is a simple overall indicator, while macro-F1 is more informative for sentiment classification because it weights each class equally and therefore highlights problems on minority classes even when accuracy looks acceptable.
 
-train_loss_total: This is the primary indicator of model convergence. The graph shows a sharp initial drop followed by a stable plateau, confirming that the model has effectively learned the features and reached a steady state.
-
-lr (Learning Rate): I monitored the learning rate, which remained constant at 0.0001. This is important to ensure the optimizer updates parameters at a predictable pace, maintaining training stability.
-
-These metrics inform us that the training environment is well-controlled, with the model reaching deep convergence through stable parameter updates.
+In addition, we log the learning rate, step/epoch counters, and runtime-related information. Tracking the learning rate (even in a constant schedule) helps confirm that configuration is applied as intended and makes it easier to compare runs. Validation curves (loss/F1 over epochs) are used to detect overfitting early: a decreasing training loss combined with a flat or decreasing validation F1 indicates that the model is memorizing the training set. Finally, the same metrics are saved to local run artifacts (`metrics.json` and `run_config.json`) so that results can be inspected and reproduced even without access to W&B.
+We also record key hyperparameters (batch size, max length, seed) to make comparisons fair and to support exact reruns from the CLI.
 
 ### Question 15
 
@@ -370,9 +374,9 @@ The run writes artifacts to `models/finbert/small/`, including `metrics.json`, `
 >
 > Answer:
 
-For debugging, our approach was twofold. We primarily utilized interactive debugging within VS Code to set breakpoints and inspect tensor shapes during the training loop. Additionally, we relied heavily on W&B's real-time logging to detect anomalies, allowing us to catch bugs that only manifest after several thousand steps.
+When debugging training or data issues, we first reproduce failures with the smallest possible configuration (tier=`small`, few epochs, and limited sample counts). This gives a fast feedback loop and makes it easier to isolate whether the issue is data-related (schema, labels, tokenization) or training-related (device, metrics computation, saving artifacts). We rely on structured logs (`train.log`) and deterministic seeds to ensure that the same run can be replayed. For API-related bugs, we use `pytest` with monkeypatching to avoid network downloads and to test failure modes (invalid inputs, offline mode).
 
-Regarding profiling, we do not consider the code perfect. We attempted to use the PyTorch Profiler to optimize the num_workers setting for our data loading pipeline. However, the results were inconclusive, as increasing the number of workers did not yield a significant performance gain.
+We do not consider the code perfect and we have not performed deep profiling yet. If we were to optimize further, we would start by measuring data preprocessing time versus model forward/backward time, and then use targeted tools (e.g., PyTorch profiler) only after identifying a real bottleneck.
 
 ## Working in the cloud
 
@@ -388,9 +392,8 @@ Regarding profiling, we do not consider the code perfect. We attempted to use th
 > *We used the following two services: Engine and Bucket. Engine is used for... and Bucket is used for...*
 >
 > Answer:
+
 We used the following services: Compute Engine, Cloud Storage, Artifact Registry, Cloud Build, and Cloud Run. Compute Engine is used for provisioning the Virtual Machine (VM) where we executed our training container. Cloud Storage is used as the remote backend for DVC to store our data and model artifacts. Artifact Registry is used for hosting our docker images, and Cloud Build is used for automatically building these images. Finally, Cloud Run is used for deploying our inference API as a serverless application.
-
-
 
 ### Question 18
 
@@ -404,7 +407,8 @@ We used the following services: Compute Engine, Cloud Storage, Artifact Registry
 > *using a custom container: ...*
 >
 > Answer:
-We used the compute engine to run our model training workload in the cloud. We used instances with the following hardware: an `e2-standard-4` machine type (4 vCPUs, 16 GB memory), located in the `asia-east2-a` zone. We started the training by SSH-ing into the instance (`sns-mlops-vm`) and running our custom docker container `sns-mlops-train` which we pulled from the Artifact Registry.
+
+We used Google Compute Engine to run our training workload in a controlled environment that is close to production. Our main VM was an `e2-standard-4` instance (4 vCPUs, 16 GB RAM) in the `asia-east2-a` zone, which was sufficient for CPU fine-tuning runs and kept costs predictable. After SSH-ing into the instance (e.g., `sns-mlops-vm`), we pulled the training container image from Artifact Registry and executed the same command-line interface used locally. Data and artifacts were stored on the VM disk and/or synchronized with Cloud Storage when needed. Running training in a container on Compute Engine ensured that the exact same dependencies and entrypoint were used across developers and across reruns, which reduced environment-related failures.
 
 ### Question 19
 
@@ -412,9 +416,8 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **You can take inspiration from [this figure](figures/bucket.png).**
 >
 > Answer:
+
 ![GCP Bucket Content](figures/q19_bucket.png)
-
-
 
 ### Question 20
 
@@ -422,8 +425,8 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **stored. You can take inspiration from [this figure](figures/registry.png).**
 >
 > Answer:
-![Artifact Registry Content](figures/q20_registry.png)
 
+![Artifact Registry Content](figures/q20_registry.png)
 
 ### Question 21
 
@@ -431,8 +434,8 @@ We used the compute engine to run our model training workload in the cloud. We u
 > **your project. You can take inspiration from [this figure](figures/build.png).**
 >
 > Answer:
-![Cloud Build History](figures/q21_build.png)
 
+![Cloud Build History](figures/q21_build.png)
 
 ### Question 22
 
@@ -446,11 +449,10 @@ We used the compute engine to run our model training workload in the cloud. We u
 > *was because ...*
 >
 > Answer:
+
 Yes, we successfully trained our model in the cloud using Google Compute Engine. We provisioned an `e2-standard-4` virtual machine instance in the `asia-east2-a` zone. After connecting to the instance via SSH, we first executed `dvc pull` to download our training data directly from the Google Cloud Storage bucket. Then, we pulled our custom training docker image (`sns-mlops-train`) from the Artifact Registry and executed the training command.
 
 We deliberately chose this CPU-based setup over a GPU instance for two reasons: First, our model is relatively small, and the performance on the CPU was satisfactory for our needs. Second, the CUDA-based GPU Docker images were extremely large, and we faced persistent timeouts and failures when attempting to push them to the Artifact Registry. Therefore, we opted for a lightweight CPU-only image to ensure a reliable and successful deployment pipeline.
-
-
 
 ## Deployment
 
@@ -466,10 +468,10 @@ We deliberately chose this CPU-based setup over a GPU instance for two reasons: 
 > *to the API to make it more ...*
 >
 > Answer:
+
 Yes, we implemented a robust REST API using FastAPI to serve our FinBERT sentiment model. The API features a POST `/predict` endpoint that takes text input and returns the predicted label, confidence score, and a full probability distribution.
 
 A special feature of our implementation is the hierarchical model loading strategy integrated into the FastAPI `lifespan` event. The system automatically searches for the best available model on the local disk by checking three priority paths: `Full`, `Dev`, and `Small` (in that order). This ensures that the API always serves the highest-quality version of the model available in the deployment environment. Furthermore, we implemented a `lifespan` context manager to load the model and tokenizer into memory only once at startup, which minimizes inference latency for subsequent requests. We also included a `/health` endpoint to monitor the readiness of the model and its running device (CPU/GPU).
-
 
 ### Question 24
 
@@ -484,6 +486,7 @@ A special feature of our implementation is the hierarchical model loading strate
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
 > Answer:
+
 Yes, we successfully deployed our API both locally and in the cloud using **Google Cloud Run**. For the cloud deployment, we packaged our FastAPI application into a Docker container, pushed it to the **Artifact Registry**, and deployed it as a serverless service.
 
 We chose Cloud Run because it automatically handles scaling and provides a public HTTPS endpoint. To invoke the service, a user can send a POST request to our live endpoint using `curl`. For example:
@@ -496,7 +499,6 @@ curl -X 'POST' \
   -d '{ "text": "The company reported a significant increase in quarterly revenue." }'
 
 ```
-
 
 ### Question 25
 
@@ -549,6 +551,7 @@ This monitoring setup is vital for the application's longevity for several reaso
 > Answer:
 
 Our group used a total of 2.53 USD in credits throughout the development process. The most expensive service was Compute Engine, as it was used for provisioning the VM instances required for our model training. Generally, working in the cloud provided a functional environment for managing our MLOps lifecycle. The technical integration between Cloud Build for containerization, Artifact Registry for storage, and Cloud Run for serverless deployment allowed us to manage dependencies more reliably compared to local development.
+At the same time, the cloud introduced operational overhead compared to local development. We had to deal with IAM permissions, service quotas, and debugging failures that were specific to remote environments (for example, data access permissions and container startup constraints). The main benefit was that the pipeline became more “realistic”: building containers, pushing images, and deploying services forced us to think about artifacts, versioning, and reproducibility in a way that local-only experiments often do not. Overall, we found the cloud valuable for demonstrating an end-to-end MLOps workflow, but it requires disciplined cost monitoring and clear documentation to be productive.
 
 ### Question 28
 
@@ -581,8 +584,11 @@ Beyond the standard requirements, we implemented a hierarchical model loading st
 
 > Answer:
 
-![Cloud Run Monitoring Dashboard](figures/q29_workflow.png)
-(https://github.com/Yayi0117/stock-news-sentiment-mlops)
+![System Architecture](figures/q29_workflow.png)
+
+The figure summarizes our end-to-end MLOps workflow from local development to cloud deployment. Development starts locally, where we maintain a reproducible Python environment (`environment.yml` + `requirements*.txt`) and implement a deterministic pipeline for data processing and training. Data is fetched from a Hugging Face dataset, validated against an explicit schema, and materialized into Parquet splits for three tiers (small/dev/full). DVC is used to define pipeline stages (`data` and `train`) and to record exact commands and output hashes in `dvc.lock`, so we can reproduce the same artifacts later with `dvc repro`.
+
+When code is pushed to GitHub, GitHub Actions runs linting and unit tests on multiple OS/Python versions and publishes a coverage report. For cloud execution, container images are built using Cloud Build and stored in Artifact Registry. Training runs are executed using the training image (e.g., on Compute Engine) and produce run artifacts such as `metrics.json`, `run_config.json`, `train.log`, and an optional exported model directory. For inference, a FastAPI service is packaged as a container and deployed on Cloud Run. The API loads the best available local model artifact when present and exposes a `/predict` endpoint for sentiment inference. Monitoring and load testing are performed using Cloud Run’s built-in metrics and Locust-based traffic simulation.
 
 ### Question 30
 
@@ -596,7 +602,9 @@ Beyond the standard requirements, we implemented a hierarchical model loading st
 >
 > Answer:
 
---- question 30 fill here ---
+The project was mostly an engineering challenge rather than a modeling challenge. One major struggle was making the workflow reproducible across machines and CI runners while still relying on large external artifacts (datasets and pretrained model weights). We solved this by introducing “tiers” (small/dev/full) and by designing the code so that unit tests never require network access. In CI we set Hugging Face offline flags and use monkeypatching in tests to guarantee that accidental downloads fail fast. This forced us to keep boundaries clean between “pure logic” (schema validation, artifact writing, metric computation) and “external I/O” (downloads).
+
+Another struggle was data and artifact management. Large Parquet files and trained weights do not belong in Git history, but we still needed a way to regenerate them deterministically. DVC helped us encode the pipeline as stages and capture hashes in `dvc.lock`, while the training script writes a clear artifact contract (`metrics.json`, `run_config.json`, `train.log`, and an optional exported model directory). We also encountered practical issues such as cloud IAM permissions for storage and platform-specific problems on Windows (e.g., encoding and line endings). We overcame these by documenting exact commands, using automated formatting (`ruff`), and iterating with short smoke runs before attempting full training or deployment. Overall, the time was mainly spent on integration, debugging, and making the pipeline robust rather than on tweaking the model itself.
 
 ### Question 31
 
@@ -614,14 +622,6 @@ Beyond the standard requirements, we implemented a hierarchical model loading st
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
-fewafewubaofewnafioewnifowf ewafw afew afewafewafionewoanf waf ewonfieownaf fewnaiof newio fweanøf wea fewa
- fweafewa fewiagonwa ognwra'g
- wa
- gwreapig ipweroang w rag
- wa grwa
-  g
-  ew
-  gwea g
-  ew ag ioreabnguorwa bg̈́aw
-   wa
-   gew4igioera giroeahgi0wra gwa
+Our team collaborated closely, and all members contributed actively to the project. Yayi focused on the initial project setup, ensuring reproducibility, establishing continuous integration workflows, and maintaining overall project structure. Liming and Ruizhi were primarily responsible for the cloud components, including API development, infrastructure configuration, and deployment. Hao contributed significantly to monitoring and scaling the application to ensure stable performance. Throughout the project, we worked together to solve issues, review each other’s code, and make design decisions collectively.
+
+We used generative AI tools such as Codex, ChatGPT, and Gemini to assist with debugging, environment setup, and clarifying technical concepts. During report writing, we also used these tools to check grammar and improve clarity, while ensuring that all core ideas and implementations were developed by the team.

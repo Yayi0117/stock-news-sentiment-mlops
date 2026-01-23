@@ -25,7 +25,7 @@ conda activate py312
 pip install -e .
 ```
 
-### GPU/CUDA 环境（本地）
+### GPU/CUDA environment (Local)
 
 If you already have NVIDIA drivers and CUDA installed, use the GPU requirements file:
 
@@ -61,11 +61,13 @@ dvc repro data
 ```
 
 Expected outputs:
+
 - `data/processed/small/{train,val,test}.parquet` + `metadata.json`
 - `data/processed/dev/{train,val,test}.parquet` + `metadata.json`
 - `data/processed/full/{train,val,test}.parquet` + `metadata.json`
 
 Raw caching:
+
 - The first run writes `data/raw/train.parquet` and `data/raw/metadata.json`.
 - Subsequent runs reuse `data/raw/` if `dataset_name` and `revision` match.
 
@@ -106,16 +108,19 @@ python -m sns_mlops.train `
 ```
 
 Expected outputs:
+
 - `models/finbert/small/run_config.json`
 - `models/finbert/small/metrics.json`
 - `models/finbert/small/train.log`
 
 Optional output:
+
 - `models/finbert/small/model/` (final model + tokenizer; ignored by Git and not tracked by DVC)
 
 ## DVC pipeline
 
 Stages are defined in `dvc.yaml`:
+
 - `data`: materializes processed tiers under `data/processed/`
 - `train`: runs a short `small` tier training run and writes run artifacts
 
@@ -126,6 +131,7 @@ dvc repro
 ```
 
 Tracking policy:
+
 - `train` stage tracks `run_config.json`, `metrics.json`, and `train.log` as DVC outputs.
 - Model weights are saved locally but not tracked by DVC to avoid large artifacts.
 
@@ -149,10 +155,12 @@ pre-commit run --all-files
 ## Continuous integration (GitHub Actions)
 
 Workflows live under `.github/workflows/`:
+
 - `tests.yaml`: multi-OS (Ubuntu/Windows/macOS) and multi-Python (3.11/3.12) tests + coverage artifact (`coverage.xml`)
 - `linting.yaml`: `ruff check .` and `ruff format --check .`
 
 To prevent accidental Hugging Face downloads during CI, the tests job sets:
+
 - `HF_HUB_OFFLINE=1`
 - `TRANSFORMERS_OFFLINE=1`
 
@@ -257,6 +265,7 @@ docker run --gpus all --rm -p 8000:8000 sns-mlops-api:gpu
 ```
 
 **Requirements:**
+
 - NVIDIA GPU with CUDA support
 - [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed
 - Docker with GPU support enabled
