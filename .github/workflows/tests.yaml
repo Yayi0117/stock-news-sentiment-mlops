@@ -40,17 +40,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          # Install DVC with Google Drive support and project dependencies
-          pip install "dvc[gdrive]"
           pip install -r requirements.txt -r requirements_dev.txt
           pip install -e .
-
-      - name: Pull data from DVC
-        # Run only when model data is needed to ensure API tests can load the model
-        run: |
-          dvc pull
-        env:
-          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
 
       - name: Run tests & coverage
         run: |
