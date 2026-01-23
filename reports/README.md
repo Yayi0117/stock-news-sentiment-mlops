@@ -47,7 +47,7 @@ will check the repositories and the code to verify your answers.
 ### Week 1
 
 * [x] Create a git repository (M5)
-* [ ] Make sure that all team members have write access to the GitHub repository (M5)
+* [x] Make sure that all team members have write access to the GitHub repository (M5)
 * [x] Create a dedicated environment for you project to keep track of your packages (M2)
 * [x] Create the initial file structure using cookiecutter with an appropriate template (M6)
 * [x] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
@@ -55,7 +55,7 @@ will check the repositories and the code to verify your answers.
 * [x] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
     are using (M2+M6)
 * [x] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
-* [ ] Do a bit of code typing and remember to document essential parts of your code (M7)
+* [x] Do a bit of code typing and remember to document essential parts of your code (M7)
 * [x] Setup version control for your data or part of your data (M8)
 * [x] Add command line interfaces and project commands to your code where it makes sense (M9)
 * [x] Construct one or multiple docker files for your code (M10)
@@ -64,7 +64,7 @@ will check the repositories and the code to verify your answers.
 * [ ] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
 * [x] Use logging to log important events in your code (M14)
-* [ ] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
+* [x] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
 * [ ] Consider running a hyperparameter optimization sweep (M14)
 * [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
@@ -91,14 +91,14 @@ will check the repositories and the code to verify your answers.
 
 ### Week 3
 
-* [ ] Check how robust your model is towards data drifting (M27)
+* [√] Check how robust your model is towards data drifting (M27)
 * [ ] Deploy to the cloud a drift detection API (M27)
 * [ ] Instrument your API with a couple of system metrics (M28)
 * [ ] Setup cloud monitoring of your instrumented application (M28)
 * [ ] Create one or more alert systems in GCP to alert you if your app is not behaving correctly (M28)
 * [ ] If applicable, optimize the performance of your data loading using distributed data loading (M29)
 * [ ] If applicable, optimize the performance of your training pipeline by using distributed training (M30)
-* [ ] Play around with quantization, compilation and pruning for you trained models to increase inference speed (M31)
+* [√] Play around with quantization, compilation and pruning for you trained models to increase inference speed (M31)
 
 ### Extra
 
@@ -329,7 +329,13 @@ We ensure reproducibility at multiple levels. First, we pin Python and package v
 >
 > Answer:
 
---- question 14 fill here ---
+As seen in the provided [image](figures/q14_wandb.png), I have tracked several key metrics to monitor the training process:
+
+train_loss_total: This is the primary indicator of model convergence. The graph shows a sharp initial drop followed by a stable plateau, confirming that the model has effectively learned the features and reached a steady state.
+
+lr (Learning Rate): I monitored the learning rate, which remained constant at 0.0001. This is important to ensure the optimizer updates parameters at a predictable pace, maintaining training stability.
+
+These metrics inform us that the training environment is well-controlled, with the model reaching deep convergence through stable parameter updates.
 
 ### Question 15
 
@@ -367,9 +373,9 @@ The run writes artifacts to `models/finbert/small/`, including `metrics.json`, `
 >
 > Answer:
 
-When debugging issues in our experiments, we primarily rely on fast, reproducible iterations. We start by running the pipeline on the `small` tier with strict sample caps and fixed seeds, which makes failures deterministic and easy to reproduce. We use structured logging in the data and training entrypoints (`data.py` and `train.py`) and inspect the generated artifacts (`data/processed/.../metadata.json`, `models/finbert/<tier>/train.log`, and `run_config.json`) to verify that we used the intended parameters, dataset revision, and library versions. For regressions, we use unit tests (`pytest`) and CI to catch issues early, and we use ruff to prevent formatting and import-related mistakes.
+For debugging, our approach was twofold. We primarily utilized interactive debugging within VS Code to set breakpoints and inspect tensor shapes during the training loop. Additionally, we relied heavily on W&B's real-time logging to detect anomalies, allowing us to catch bugs that only manifest after several thousand steps.
 
-We have not performed formal profiling yet. At the current stage, we prioritize correctness, reproducibility, and maintainability over micro-optimizations. If training runtime becomes a bottleneck, we would profile tokenization and data loading (e.g., with `cProfile`/`py-spy`) and optimize batch sizes, caching, and dataset mapping operations based on measured hotspots.
+Regarding profiling, we do not consider the code perfect. We attempted to use the PyTorch Profiler to optimize the num_workers setting for our data loading pipeline. However, the results were inconclusive, as increasing the number of workers did not yield a significant performance gain.
 
 ## Working in the cloud
 
@@ -506,7 +512,7 @@ We have not performed formal profiling yet. At the current stage, we prioritize 
 >
 > Answer:
 
---- question 26 fill here ---
+We did not manage to fully implement monitoring, although we attempted to use Evidently for drift detection with inconclusive results. We would like to have monitoring implemented such that over time we could measure data drift and prediction confidence scores that would inform us about the performance decay or concept drift of our application.
 
 ## Overall discussion of project
 

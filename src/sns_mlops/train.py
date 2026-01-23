@@ -160,6 +160,44 @@ def _compute_metrics(eval_pred: EvalPrediction) -> dict[str, float]:
     }
 
 
+def _try_init_wandb(*, tier: str, model_name: str, learning_rate: float, num_train_epochs: float, seed: int):
+    """Best-effort Weights & Biases initialization.
+
+    This is intentionally optional to keep the core training path lightweight and
+    to avoid making CI depend on external services or additional packages.
+
+    Returns:
+        The imported `wandb` module if initialized successfully, otherwise None.
+    """
+    try:
+        import wandb  # type: ignore
+    except Exception:
+        logger.info("W&B is not installed; skipping W&B logging.")
+        return None
+
+    if not os.environ.get("WANDB_API_KEY") and not os.environ.get("WANDB_MODE"):
+        logger.info("WANDB_API_KEY is not set; skipping W&B logging.")
+        return None
+
+    try:
+        wandb.init(
+            project="stock-news-sentiment",
+            name=f"finbert-{tier}-{datetime.now().strftime('%m%d-%H%M')}",
+            config={
+                "tier": tier,
+                "model_name": model_name,
+                "learning_rate": learning_rate,
+                "num_train_epochs": num_train_epochs,
+                "seed": seed,
+            },
+        )
+    except Exception as exc:
+        logger.warning("Failed to initialize W&B logging: %s", exc)
+        return None
+
+    return wandb
+
+
 def train(
     *,
     tier: str,
@@ -224,6 +262,14 @@ def train(
         overwrite_output_dir,
     )
 
+    wandb = _try_init_wandb(
+        tier=tier,
+        model_name=model_name,
+        learning_rate=learning_rate,
+        num_train_epochs=num_train_epochs,
+        seed=seed,
+    )
+
     set_seed(seed)
 
     data_metadata_path = processed_root / tier / "metadata.json"
@@ -260,6 +306,7 @@ def train(
         logging_steps=50,
         report_to=[],
         disable_tqdm=False,
+        fp16=False,
     )
 
     run_config = RunConfig(
@@ -310,6 +357,38 @@ def train(
         "test": dict(test_metrics),
     }
     _write_json(run_output_dir / "metrics.json", metrics)
+
+    if wandb is not None:
+        for split_name, split_metrics in metrics.items():
+            renamed_metrics = {f"{split_name}/{k}": v for k, v in split_metrics.items()}
+            wandb.log(renamed_metrics)
+
+        try:
+            import pandas as pd
+            from evidently import DataDefinition, Dataset, Regression, Report
+            from evidently.presets import DataDriftPreset
+
+            report_data = pd.DataFrame(
+                {
+                    "target": test_output.label_ids,
+                    "prediction": np.argmax(test_output.predictions, axis=-1),
+                }
+            )
+
+            data_definition = DataDefinition(regression=[Regression(target="target", prediction="prediction")])
+            evident_data = Dataset.from_pandas(report_data, data_definition=data_definition)
+
+            report_path = "evd_report.html"
+            report = Report([DataDriftPreset()])
+            report.run(evident_data).save_html(report_path)
+
+            with open(report_path, encoding="utf-8") as handle:
+                wandb.log({"evidently_report": wandb.Html(handle.read())})
+
+            logger.info("Evidently report saved to %s", report_path)
+
+        except Exception as exc:
+            logger.warning("Failed to generate Evidently report: %s", exc)
 
     logger.info("Finished training run. Metrics written to %s", run_output_dir / "metrics.json")
 

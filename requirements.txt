@@ -7,3 +7,5 @@ pyarrow==21.0.0
 transformers==4.48.2
 scikit-learn==1.5.2
 accelerate==0.34.2
+wandb==0.24.0
+evidently==0.7.20
