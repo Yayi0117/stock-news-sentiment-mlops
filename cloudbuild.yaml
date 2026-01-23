@@ -10,7 +10,7 @@ steps:
       '-f', 'dockerfiles/train.dockerfile',
       '.'
     ]
-  
+
   # Task 1.5: Push Train image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push Train Image'
@@ -27,7 +27,7 @@ steps:
       '-f', 'dockerfiles/api.dockerfile',
       '.'
     ]
-  
+
   # Task 2.5: Push API image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push API Image'
