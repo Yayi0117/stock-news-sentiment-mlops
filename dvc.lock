@@ -2,67 +2,154 @@ schema: '2.0'
 stages:
   data:
     cmd: python src/sns_mlops/data.py --dataset-name NOSIBLE/financial-sentiment
-      --output-root data/processed --seed 42 --test-size 0.1 --val-size 0.1
+      --output-root data/processed --seed 42 --test-size 0.1 --val-size 0.1 
       --small-size 2000 --dev-size 10000
     deps:
     - path: requirements.txt
       hash: md5
-      md5: 0bf0a7e1390d5229a59fb38c31bec354
-      size: 153
+      md5: f9aa30a11dfc7e59e76a21196f42c4ba
+      size: 226
     - path: src/sns_mlops/data.py
       hash: md5
-      md5: 5a5bfcdb59ff7fb33ad228c9cab54638
-      size: 19431
+      md5: fc9d595cbfc5e1286ebbc3cb27d3d363
+      size: 19922
     outs:
     - path: data/processed/dev
       hash: md5
-      md5: 88095d83b397198153fe38520229bcb7.dir
-      size: 3903049
-      nfiles: 4
+      files:
+      - relpath: metadata.json
+        md5: 9a8051469d9beec6cfca0d1acb0edac8
+        size: 1920
+        cloud:
+          remote_storage:
+            etag: 0893cbebbdb99f92031001
+            version_id: '1769095279863187'
+      - relpath: test.parquet
+        md5: 114b36e477c6532d6e7bb5f70f614d59
+        size: 385800
+        cloud:
+          remote_storage:
+            etag: 08f2d2fbbdb99f92031001
+            version_id: '1769095280126322'
+      - relpath: train.parquet
+        md5: 5f741cef07da907e635792c4fd697b1c
+        size: 3116387
+        cloud:
+          remote_storage:
+            etag: 08c4f7bbbeb99f92031001
+            version_id: '1769095281179588'
+      - relpath: val.parquet
+        md5: 9b5964e422ff13112a2c90b12544bee3
+        size: 398942
+        cloud:
+          remote_storage:
+            etag: 08acd9f6bdb99f92031001
+            version_id: '1769095280045228'
     - path: data/processed/full
       hash: md5
-      md5: 82804cd997ee2d538e5f6c078a60322c.dir
-      size: 38553820
-      nfiles: 4
+      files:
+      - relpath: metadata.json
+        md5: ec2d23afa03ab3ff54ac5ea783e388a5
+        size: 1923
+        cloud:
+          remote_storage:
+            etag: 0884d4ebbdb99f92031001
+            version_id: '1769095279864324'
+      - relpath: test.parquet
+        md5: 25f6ede473cf5a410a449b883e53c568
+        size: 3888476
+        cloud:
+          remote_storage:
+            etag: 08e0fcbdbeb99f92031001
+            version_id: '1769095281213024'
+      - relpath: train.parquet
+        md5: 83221c8581fda2e32fe84a9bc68d41c6
+        size: 30798951
+        cloud:
+          remote_storage:
+            etag: 08aed9e3c0b99f92031001
+            version_id: '1769095286025390'
+      - relpath: val.parquet
+        md5: c94bd9b10c3a8dc23ed7abcc0c1b6e8b
+        size: 3864470
+        cloud:
+          remote_storage:
+            etag: 0880dbe4beb99f92031001
+            version_id: '1769095281847680'
     - path: data/processed/small
       hash: md5
-      md5: 935dfc9f106d1d1e1b73712f46596498.dir
-      size: 787566
-      nfiles: 4
+      files:
+      - relpath: metadata.json
+        md5: 4c96ccd563f2cabe88c1813320dc2166
+        size: 1919
+        cloud:
+          remote_storage:
+            etag: 08eb81cabdb99f92031001
+            version_id: '1769095279313131'
+      - relpath: test.parquet
+        md5: 9444a1386787e4678a9fd4bffa4bc47e
+        size: 79348
+        cloud:
+          remote_storage:
+            etag: 088dbbe1bdb99f92031001
+            version_id: '1769095279697293'
+      - relpath: train.parquet
+        md5: 7548965ce6beae721ad0ad21782eb353
+        size: 624127
+        cloud:
+          remote_storage:
+            etag: 089bfdffbdb99f92031001
+            version_id: '1769095280197275'
+      - relpath: val.parquet
+        md5: 43850bff8fa66a4dca0a216a4a6e18aa
+        size: 82172
+        cloud:
+          remote_storage:
+            etag: 08b1caeebdb99f92031001
+            version_id: '1769095279912241'
   train:
-    cmd: python -m sns_mlops.train --tier small --processed-root data/processed
+    cmd: python -m sns_mlops.train --tier small --processed-root data/processed 
       --output-dir models/finbert --seed 42 --num-train-epochs 1 --max-length 64
-      --per-device-train-batch-size 4 --per-device-eval-batch-size 8
-      --max-train-samples 64 --max-eval-samples 64 --max-test-samples 64
+      --per-device-train-batch-size 4 --per-device-eval-batch-size 8 
+      --max-train-samples 64 --max-eval-samples 64 --max-test-samples 64 
       --save-total-limit 1 --save-model --no-save-checkpoints
     deps:
     - path: data/processed
       hash: md5
-      md5: ea497b882adc688914ca2e18e30dbc9a.dir
-      size: 43244435
-      nfiles: 12
     - path: requirements.txt
       hash: md5
-      md5: 0bf0a7e1390d5229a59fb38c31bec354
-      size: 153
+      md5: f9aa30a11dfc7e59e76a21196f42c4ba
+      size: 226
     - path: src/sns_mlops/model.py
       hash: md5
-      md5: a256c3a89a45e680008314f6d06c02b3
-      size: 5628
+      md5: 0d5567c0e3ca5ccfff0f4fcb2cf6b6c8
+      size: 5803
     - path: src/sns_mlops/train.py
       hash: md5
-      md5: 787fd5ac4ada39865625ef6cdd1518bd
-      size: 14057
+      md5: 72b2ec6bde1b03667e6659e6862d5677
+      size: 16163
     outs:
     - path: models/finbert/small/metrics.json
       hash: md5
-      md5: 34311fbc6a73169704b351176253e493
+      md5: 42cb6f9d7d391b01d31c1e82db5c91ec
       size: 711
+      cloud:
+        remote_storage:
+          etag: 08e1f692f0849d92031001
+          version_id: '1769012438809441'
     - path: models/finbert/small/run_config.json
       hash: md5
-      md5: 69a01ba2d58f44c4a752c09b9280c6df
-      size: 7165
+      md5: 5daf9103993c631e80253ea65eb8d823
+      size: 7164
+      cloud:
+        remote_storage:
+          etag: 08a7be90f0849d92031001
+          version_id: '1769012438769447'
     - path: models/finbert/small/train.log
       hash: md5
-      md5: e94fd22f36ff3ce0277aa38b9296664a
-      size: 473
+      md5: 57aa2485d47b1b02824eddfb943e2e10
+      size: 589
+      cloud:
+        remote_storage:
+          etag: 08f1ea93f0849d92031001
+          version_id: '1769012438824305'

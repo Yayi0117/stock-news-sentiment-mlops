@@ -190,3 +190,7 @@ AGENTS.md
 models/**
 !models/.gitkeep
 handoff.md
+# cloud password files
+gcp_key.json
+# Weights and Biases
+wandb/

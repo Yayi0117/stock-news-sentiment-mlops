@@ -1,0 +1,6 @@
+[core]
+    remote = remote_storage
+
+['remote "remote_storage"']
+    url = gs://light-mountain-484115-t6-v1-hk/dvc_storage
+    version_aware = true

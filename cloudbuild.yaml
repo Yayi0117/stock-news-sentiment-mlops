@@ -1,0 +1,37 @@
+steps:
+  # ==========================================
+  # Task 1: Build Train image in the cloud
+  # ==========================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build Train Image'
+    args: [
+      'build',
+      '-t', 'asia-east2-docker.pkg.dev/light-mountain-484115-t6/sns-mlops-repo/train:latest',
+      '-f', 'dockerfiles/train.dockerfile',
+      '.'
+    ]
+  
+  # Task 1.5: Push Train image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push Train Image'
+    args: ['push', 'asia-east2-docker.pkg.dev/light-mountain-484115-t6/sns-mlops-repo/train:latest']
+
+  # ==========================================
+  # Task 2: Build API image in the cloud
+  # ==========================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build API Image'
+    args: [
+      'build',
+      '-t', 'asia-east2-docker.pkg.dev/light-mountain-484115-t6/sns-mlops-repo/api:latest',
+      '-f', 'dockerfiles/api.dockerfile',
+      '.'
+    ]
+  
+  # Task 2.5: Push API image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push API Image'
+    args: ['push', 'asia-east2-docker.pkg.dev/light-mountain-484115-t6/sns-mlops-repo/api:latest']
+
+options:
+  logging: CLOUD_LOGGING_ONLY
