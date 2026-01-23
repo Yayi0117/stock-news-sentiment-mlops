@@ -46,46 +46,46 @@ will check the repositories and the code to verify your answers.
 
 ### Week 1
 
-* [√] Create a git repository (M5)
-* [√] Make sure that all team members have write access to the GitHub repository (M5)
-* [√] Create a dedicated environment for you project to keep track of your packages (M2)
-* [√] Create the initial file structure using cookiecutter with an appropriate template (M6)
-* [√] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
-* [√] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
-* [√] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
+* [x] Create a git repository (M5)
+* [x] Make sure that all team members have write access to the GitHub repository (M5)
+* [x] Create a dedicated environment for you project to keep track of your packages (M2)
+* [x] Create the initial file structure using cookiecutter with an appropriate template (M6)
+* [x] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
+* [x] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
+* [x] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
     are using (M2+M6)
-* [√] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
-* [√] Do a bit of code typing and remember to document essential parts of your code (M7)
-* [√] Setup version control for your data or part of your data (M8)
-* [√] Add command line interfaces and project commands to your code where it makes sense (M9)
-* [√] Construct one or multiple docker files for your code (M10)
-* [√] Build the docker files locally and make sure they work as intended (M10)
+* [x] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
+* [x] Do a bit of code typing and remember to document essential parts of your code (M7)
+* [x] Setup version control for your data or part of your data (M8)
+* [x] Add command line interfaces and project commands to your code where it makes sense (M9)
+* [x] Construct one or multiple docker files for your code (M10)
+* [x] Build the docker files locally and make sure they work as intended (M10)
 * [ ] Write one or multiple configurations files for your experiments (M11)
 * [ ] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
-* [√] Use logging to log important events in your code (M14)
-* [√] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
+* [x] Use logging to log important events in your code (M14)
+* [x] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
 * [ ] Consider running a hyperparameter optimization sweep (M14)
 * [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
 ### Week 2
 
-* [√] Write unit tests related to the data part of your code (M16)
-* [√] Write unit tests related to model construction and or model training (M16)
-* [√] Calculate the code coverage (M16)
-* [√] Get some continuous integration running on the GitHub repository (M17)
-* [√] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
-* [√] Add a linting step to your continuous integration (M17)
-* [√] Add pre-commit hooks to your version control setup (M18)
+* [x] Write unit tests related to the data part of your code (M16)
+* [x] Write unit tests related to model construction and or model training (M16)
+* [x] Calculate the code coverage (M16)
+* [x] Get some continuous integration running on the GitHub repository (M17)
+* [x] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
+* [x] Add a linting step to your continuous integration (M17)
+* [x] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
-* [√] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
-* [√] Create a trigger workflow for automatically building your docker images (M21)
-* [√] Get your model training in GCP using either the Engine or Vertex AI (M21)
-* [√] Create a FastAPI application that can do inference using your model (M22)
-* [√] Deploy your model in GCP using either Functions or Run as the backend (M23)
-* [√] Write API tests for your application and setup continues integration for these (M24)
-* [√] Load test your application (M24)
+* [ ] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
+* [ ] Create a trigger workflow for automatically building your docker images (M21)
+* [ ] Get your model training in GCP using either the Engine or Vertex AI (M21)
+* [ ] Create a FastAPI application that can do inference using your model (M22)
+* [ ] Deploy your model in GCP using either Functions or Run as the backend (M23)
+* [ ] Write API tests for your application and setup continues integration for these (M24)
+* [ ] Load test your application (M24)
 * [ ] Create a more specialized ML-deployment API using either ONNX or BentoML, or both (M25)
 * [ ] Create a frontend for your API (M26)
 
@@ -93,7 +93,7 @@ will check the repositories and the code to verify your answers.
 
 * [√] Check how robust your model is towards data drifting (M27)
 * [ ] Deploy to the cloud a drift detection API (M27)
-* [√] Instrument your API with a couple of system metrics (M28)
+* [ ] Instrument your API with a couple of system metrics (M28)
 * [ ] Setup cloud monitoring of your instrumented application (M28)
 * [ ] Create one or more alert systems in GCP to alert you if your app is not behaving correctly (M28)
 * [ ] If applicable, optimize the performance of your data loading using distributed data loading (M29)
@@ -116,7 +116,8 @@ will check the repositories and the code to verify your answers.
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
 > Answer:
-GROUP 14
+
+Group 14
 
 ### Question 2
 >
@@ -127,9 +128,8 @@ GROUP 14
 > *sXXXXXX, sXXXXXX, sXXXXXX*
 >
 > Answer:
-> s250181
 
---- question 2 fill here ---
+s243559, s250109, s242625, s250181
 
 ### Question 3
 >
@@ -143,7 +143,6 @@ GROUP 14
 > *package to do ... and ... in our project*.
 >
 > Answer:
-
 
 We used Hugging Face Transformers as the main third-party framework beyond the course core tooling. Transformers provides the `Trainer` abstraction, pretrained model loading, tokenization, and model export, which allowed us to focus on MLOps engineering quality rather than writing and debugging a custom PyTorch training loop. We also used the Hugging Face Datasets library to standardize data loading and Parquet materialization, which integrates well with deterministic splits and DVC-based reproducibility. Together, these libraries reduced boilerplate, improved maintainability, and made it straightforward to create reproducible run artifacts (`run_config.json`, `metrics.json`, and `train.log`).
 
@@ -181,7 +180,6 @@ We manage dependencies using a Conda environment defined in `environment.yml` (n
 >
 > Answer:
 
-
 We initialized the repository from the official cookiecutter MLOps template and kept the overall structure. We filled out the core project modules under `src/sns_mlops/`, focusing on a reproducible data pipeline (`data.py`), FinBERT model construction (`model.py`), and a Trainer-based training entrypoint (`train.py`). We added unit tests under `tests/` covering data, model configuration, and the training artifact contract. For reproducibility and artifact tracking, we enabled DVC and defined `data` and `train` stages in `dvc.yaml`. We also kept the provided documentation skeleton under `docs/` (MkDocs + Material) and added pages describing how to run the pipeline. Finally, we added a CPU-only training Dockerfile under `dockerfiles/` to make training runnable in a container.
 
 ### Question 6
@@ -196,7 +194,6 @@ We initialized the repository from the official cookiecutter MLOps template and 
 > *concepts are important in larger projects because ... . For example, typing ...*
 >
 > Answer:
-
 
 We enforce code quality and consistent formatting using ruff (`ruff check .` and `ruff format --check .`) configured in `pyproject.toml`, and we run these checks in CI. Locally, we use pre-commit hooks (`.pre-commit-config.yaml`) to run ruff and basic sanity checks (YAML/JSON validation, trailing whitespace fixes) before commits. We use type hints in the core pipeline and provide docstrings for the key modules and entrypoints; in addition, we maintain MkDocs-based project documentation to make the pipeline runnable by new team members. These practices matter in larger projects because they reduce ambiguity, prevent style drift, catch errors early, and make collaboration and long-term maintenance feasible.
 
@@ -246,7 +243,6 @@ Our current total code coverage is 70% for the `sns_mlops` package (measured wit
 > *addition to the main branch. To merge code we ...*
 >
 > Answer:
-
 
 Yes. We work on feature branches and merge changes through pull requests into the default branch (`master`). Each pull request triggers GitHub Actions workflows for unit tests, coverage, and linting, which provides a clear quality gate before merging. This workflow helps the team collaborate safely by keeping changes reviewable and by ensuring that the main branch remains in a runnable state. As a next step, we can add GitHub branch protection rules to require status checks to pass and at least one approval before merging.
 
@@ -396,9 +392,7 @@ Regarding profiling, we do not consider the code perfect. We attempted to use th
 >
 > Answer:
 
-We used the following services: Compute Engine, Cloud Storage, Artifact Registry, Cloud Build, and Cloud Run. Compute Engine is used for provisioning the Virtual Machine (VM) where we executed our training container. Cloud Storage is used as the remote backend for DVC to store our data and model artifacts. Artifact Registry is used for hosting our docker images, and Cloud Build is used for automatically building these images. Finally, Cloud Run is used for deploying our inference API as a serverless application.
-
-
+--- question 17 fill here ---
 
 ### Question 18
 
@@ -413,7 +407,7 @@ We used the following services: Compute Engine, Cloud Storage, Artifact Registry
 >
 > Answer:
 
-We used the compute engine to run our model training workload in the cloud. We used instances with the following hardware: an `e2-standard-4` machine type (4 vCPUs, 16 GB memory), located in the `asia-east2-a` zone. We started the training by SSH-ing into the instance (`sns-mlops-vm`) and running our custom docker container `sns-mlops-train` which we pulled from the Artifact Registry.
+--- question 18 fill here ---
 
 ### Question 19
 
@@ -422,10 +416,7 @@ We used the compute engine to run our model training workload in the cloud. We u
 >
 > Answer:
 
-The results are shown in the figure below:
-![GCP Bucket Content](figures/q19_bucket.png)
-
-
+--- question 19 fill here ---
 
 ### Question 20
 
@@ -434,9 +425,7 @@ The results are shown in the figure below:
 >
 > Answer:
 
-The results are shown in the figure below:
-![Artifact Registry Content](figures/q20_registry.png)
-
+--- question 20 fill here ---
 
 ### Question 21
 
@@ -445,9 +434,7 @@ The results are shown in the figure below:
 >
 > Answer:
 
-The results are shown in the figure below:
-![Cloud Build History](figures/q21_build.png)
-
+--- question 21 fill here ---
 
 ### Question 22
 
@@ -462,11 +449,7 @@ The results are shown in the figure below:
 >
 > Answer:
 
-Yes, we successfully trained our model in the cloud using Google Compute Engine. We provisioned an `e2-standard-4` virtual machine instance in the `asia-east2-a` zone. After connecting to the instance via SSH, we first executed `dvc pull` to download our training data directly from the Google Cloud Storage bucket. Then, we pulled our custom training docker image (`sns-mlops-train`) from the Artifact Registry and executed the training command.
-
-We deliberately chose this CPU-based setup over a GPU instance for two reasons: First, our model is relatively small, and the performance on the CPU was satisfactory for our needs. Second, the CUDA-based GPU Docker images were extremely large, and we faced persistent timeouts and failures when attempting to push them to the Artifact Registry. Therefore, we opted for a lightweight CPU-only image to ensure a reliable and successful deployment pipeline.
-
-
+--- question 22 fill here ---
 
 ## Deployment
 
@@ -483,10 +466,7 @@ We deliberately chose this CPU-based setup over a GPU instance for two reasons: 
 >
 > Answer:
 
-Yes, we implemented a robust REST API using FastAPI to serve our FinBERT sentiment model. The API features a POST `/predict` endpoint that takes text input and returns the predicted label, confidence score, and a full probability distribution. 
-
-A special feature of our implementation is the hierarchical model loading strategy integrated into the FastAPI `lifespan` event. The system automatically searches for the best available model on the local disk by checking three priority paths: `Full`, `Dev`, and `Small` (in that order). This ensures that the API always serves the highest-quality version of the model available in the deployment environment. Furthermore, we implemented a `lifespan` context manager to load the model and tokenizer into memory only once at startup, which minimizes inference latency for subsequent requests. We also included a `/health` endpoint to monitor the readiness of the model and its running device (CPU/GPU).
-
+--- question 23 fill here ---
 
 ### Question 24
 
@@ -500,21 +480,9 @@ A special feature of our implementation is the hierarchical model loading strate
 > *worked. Afterwards we deployed it in the cloud, using ... . To invoke the service an user would call*
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
-> Answer: 
+> Answer:
 
-Yes, we successfully deployed our API both locally and in the cloud using **Google Cloud Run**. For the cloud deployment, we packaged our FastAPI application into a Docker container, pushed it to the **Artifact Registry**, and deployed it as a serverless service. 
-
-We chose Cloud Run because it automatically handles scaling and provides a public HTTPS endpoint. To invoke the service, a user can send a POST request to our live endpoint using `curl`. For example:
-
-```bash
-curl -X 'POST' \
-  '[https://sns-mlops-api-593564032726.asia-east2.run.app/predict](https://sns-mlops-api-593564032726.asia-east2.run.app/predict)' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{ "text": "The company reported a significant increase in quarterly revenue." }'
-
-```
-
+--- question 24 fill here ---
 
 ### Question 25
 
@@ -529,9 +497,7 @@ curl -X 'POST' \
 >
 > Answer:
 
-For unit testing, we used **FastAPI's TestClient** together with **pytest** to verify the functionality of our endpoints, including root connectivity, health check status, and prediction logic for both valid and invalid inputs. For load testing, we used **Locust** to simulate concurrent users making requests to our deployed service. The load testing results showed that the API successfully handled an aggregate of **6 requests per second (RPS)** with **zero failures**. For the core `/predict` endpoint, the median response time was **150ms** and the 95th percentile was **380ms**, confirming that our serverless deployment on Cloud Run remains stable and responsive under concurrent traffic. 
-
-![Locust Load Test](figures/q25_locust_results.png)
+--- question 25 fill here ---
 
 ### Question 26
 
@@ -546,11 +512,7 @@ For unit testing, we used **FastAPI's TestClient** together with **pytest** to v
 >
 > Answer:
 
-We implemented monitoring at two distinct levels to ensure the system's long-term reliability. At the application level, we utilize a FastAPI /health endpoint that checks the model loading status and the health of the computation device (CPU). At the infrastructure level, we leverage Google Cloud Run's built-in monitoring dashboard to track critical metrics such as request latency, throughput, and resource utilization.
-
-This monitoring setup is vital for the application's longevity for several reasons. First, it prevents service interruptions by allowing us to monitor memory usage peaks, ensuring the allocated 4Gi of memory is sufficient for concurrent traffic and avoiding previous OOM issues. Second, it enables us to identify concept drift by observing changes in the distribution of prediction confidence scores. When financial market contexts evolve, these alerts signal the need to pull fresh data via DVC and trigger a retraining cycle, ensuring the model remains accurate over time.
-
-![Cloud Run Monitoring Dashboard](figures/q26_monitoring.png)
+We did not manage to fully implement monitoring, although we attempted to use Evidently for drift detection with inconclusive results. We would like to have monitoring implemented such that over time we could measure data drift and prediction confidence scores that would inform us about the performance decay or concept drift of our application.
 
 ## Overall discussion of project
 
@@ -569,7 +531,7 @@ This monitoring setup is vital for the application's longevity for several reaso
 >
 > Answer:
 
-Our group used a total of 2.53 USD in credits throughout the development process. The most expensive service was Compute Engine, as it was used for provisioning the VM instances required for our model training. Generally, working in the cloud provided a functional environment for managing our MLOps lifecycle. The technical integration between Cloud Build for containerization, Artifact Registry for storage, and Cloud Run for serverless deployment allowed us to manage dependencies more reliably compared to local development.
+--- question 27 fill here ---
 
 ### Question 28
 
@@ -585,7 +547,7 @@ Our group used a total of 2.53 USD in credits throughout the development process
 >
 > Answer:
 
-Beyond the standard requirements, we implemented a hierarchical model loading strategy that prioritizes local artifacts across three tiers: Full, Dev, and Small. This ensures the API always attempts to serve the highest-quality model available. Additionally, we explored two distinct deployment patterns: storing models in GCS buckets for dynamic retrieval via DVC, and embedding optimized versions directly within the API Docker image to improve container startup speed and ensure environment self-sufficiency.
+--- question 28 fill here ---
 
 ### Question 29
 
@@ -599,13 +561,10 @@ Beyond the standard requirements, we implemented a hierarchical model loading st
 >
 > *The starting point of the diagram is our local setup, where we integrated ... and ... and ... into our code.*
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
+>
 > Answer:
 
-The figure illustrates the overall cloud architecture of our system. Source code is hosted on GitHub, while GitHub Actions provides the CI/CD pipeline. On Google Cloud Platform we use Google Cloud Build, Artifact Registry, Cloud Run and Cloud Storage as the core managed services. The developer writes and tests machine learning code locally or in a dev environment and stores datasets and model checkpoints in Cloud Storage. After passing pre-commit checks, code is pushed to GitHub, and pushes or pull requests trigger a GitHub Actions workflow.
-
-Once triggered, GitHub Actions submits a build job to Google Cloud Build. Cloud Build uses the repository’s Docker configuration to build two container images, a training image and an inference API image. These images are then pushed to Artifact Registry with proper versioning. For training, a Cloud Run service pulls the training image from Artifact Registry, loads training data and runs the training process inside a container, writing the resulting model weights back to Cloud Storage. For inference, another Cloud Run service pulls the inference image, loads the latest weights from Cloud Storage at startup and exposes an HTTP API endpoint. End users interact with this API, Cloud Run executes the model for each request and returns predictions.
-
-![System Architecture](figures/q29_workflow.png)
+--- question 29 fill here ---
 
 ### Question 30
 
