@@ -46,37 +46,37 @@ will check the repositories and the code to verify your answers.
 
 ### Week 1
 
-* [√] Create a git repository (M5)
-* [√] Make sure that all team members have write access to the GitHub repository (M5)
-* [√] Create a dedicated environment for you project to keep track of your packages (M2)
-* [√] Create the initial file structure using cookiecutter with an appropriate template (M6)
-* [√] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
-* [√] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
-* [√] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
+* [x] Create a git repository (M5)
+* [x] Make sure that all team members have write access to the GitHub repository (M5)
+* [x] Create a dedicated environment for you project to keep track of your packages (M2)
+* [x] Create the initial file structure using cookiecutter with an appropriate template (M6)
+* [x] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
+* [x] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
+* [x] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
     are using (M2+M6)
-* [√] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
-* [√] Do a bit of code typing and remember to document essential parts of your code (M7)
-* [√] Setup version control for your data or part of your data (M8)
-* [√] Add command line interfaces and project commands to your code where it makes sense (M9)
-* [√] Construct one or multiple docker files for your code (M10)
-* [√] Build the docker files locally and make sure they work as intended (M10)
+* [x] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
+* [x] Do a bit of code typing and remember to document essential parts of your code (M7)
+* [x] Setup version control for your data or part of your data (M8)
+* [x] Add command line interfaces and project commands to your code where it makes sense (M9)
+* [x] Construct one or multiple docker files for your code (M10)
+* [x] Build the docker files locally and make sure they work as intended (M10)
 * [ ] Write one or multiple configurations files for your experiments (M11)
 * [ ] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
-* [√] Use logging to log important events in your code (M14)
-* [√] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
+* [x] Use logging to log important events in your code (M14)
+* [x] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
 * [ ] Consider running a hyperparameter optimization sweep (M14)
 * [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
 ### Week 2
 
-* [√] Write unit tests related to the data part of your code (M16)
-* [√] Write unit tests related to model construction and or model training (M16)
-* [√] Calculate the code coverage (M16)
-* [√] Get some continuous integration running on the GitHub repository (M17)
-* [√] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
-* [√] Add a linting step to your continuous integration (M17)
-* [√] Add pre-commit hooks to your version control setup (M18)
+* [x] Write unit tests related to the data part of your code (M16)
+* [x] Write unit tests related to model construction and or model training (M16)
+* [x] Calculate the code coverage (M16)
+* [x] Get some continuous integration running on the GitHub repository (M17)
+* [x] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
+* [x] Add a linting step to your continuous integration (M17)
+* [x] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
 * [ ] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
@@ -117,7 +117,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 1 fill here ---
+Group 14
 
 ### Question 2
 >
@@ -129,7 +129,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 2 fill here ---
+s243559, s250109, s242625, s250181
 
 ### Question 3
 >
@@ -143,8 +143,6 @@ will check the repositories and the code to verify your answers.
 > *package to do ... and ... in our project*.
 >
 > Answer:
-
---- question 3 fill here ---
 
 We used Hugging Face Transformers as the main third-party framework beyond the course core tooling. Transformers provides the `Trainer` abstraction, pretrained model loading, tokenization, and model export, which allowed us to focus on MLOps engineering quality rather than writing and debugging a custom PyTorch training loop. We also used the Hugging Face Datasets library to standardize data loading and Parquet materialization, which integrates well with deterministic splits and DVC-based reproducibility. Together, these libraries reduced boilerplate, improved maintainability, and made it straightforward to create reproducible run artifacts (`run_config.json`, `metrics.json`, and `train.log`).
 
@@ -182,8 +180,6 @@ We manage dependencies using a Conda environment defined in `environment.yml` (n
 >
 > Answer:
 
---- question 5 fill here ---
-
 We initialized the repository from the official cookiecutter MLOps template and kept the overall structure. We filled out the core project modules under `src/sns_mlops/`, focusing on a reproducible data pipeline (`data.py`), FinBERT model construction (`model.py`), and a Trainer-based training entrypoint (`train.py`). We added unit tests under `tests/` covering data, model configuration, and the training artifact contract. For reproducibility and artifact tracking, we enabled DVC and defined `data` and `train` stages in `dvc.yaml`. We also kept the provided documentation skeleton under `docs/` (MkDocs + Material) and added pages describing how to run the pipeline. Finally, we added a CPU-only training Dockerfile under `dockerfiles/` to make training runnable in a container.
 
 ### Question 6
@@ -198,8 +194,6 @@ We initialized the repository from the official cookiecutter MLOps template and 
 > *concepts are important in larger projects because ... . For example, typing ...*
 >
 > Answer:
-
---- question 6 fill here ---
 
 We enforce code quality and consistent formatting using ruff (`ruff check .` and `ruff format --check .`) configured in `pyproject.toml`, and we run these checks in CI. Locally, we use pre-commit hooks (`.pre-commit-config.yaml`) to run ruff and basic sanity checks (YAML/JSON validation, trailing whitespace fixes) before commits. We use type hints in the core pipeline and provide docstrings for the key modules and entrypoints; in addition, we maintain MkDocs-based project documentation to make the pipeline runnable by new team members. These practices matter in larger projects because they reduce ambiguity, prevent style drift, catch errors early, and make collaboration and long-term maintenance feasible.
 
@@ -249,8 +243,6 @@ Our current total code coverage is 70% for the `sns_mlops` package (measured wit
 > *addition to the main branch. To merge code we ...*
 >
 > Answer:
-
---- question 9 fill here ---
 
 Yes. We work on feature branches and merge changes through pull requests into the default branch (`master`). Each pull request triggers GitHub Actions workflows for unit tests, coverage, and linting, which provides a clear quality gate before merging. This workflow helps the team collaborate safely by keeping changes reviewable and by ensuring that the main branch remains in a runnable state. As a next step, we can add GitHub branch protection rules to require status checks to pass and at least one approval before merging.
 
