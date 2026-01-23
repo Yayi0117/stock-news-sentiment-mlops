@@ -490,7 +490,7 @@ A special feature of our implementation is the hierarchical model loading strate
 > *worked. Afterwards we deployed it in the cloud, using ... . To invoke the service an user would call*
 > *`curl -X POST -F "file=@file.json"<weburl>`*
 >
-> Answer:
+> Answer: 
 Yes, we successfully deployed our API both locally and in the cloud using **Google Cloud Run**. For the cloud deployment, we packaged our FastAPI application into a Docker container, pushed it to the **Artifact Registry**, and deployed it as a serverless service. 
 
 We chose Cloud Run because it automatically handles scaling and provides a public HTTPS endpoint. To invoke the service, a user can send a POST request to our live endpoint using `curl`. For example:
@@ -517,7 +517,8 @@ curl -X 'POST' \
 > *before the service crashed.*
 >
 > Answer:
-For unit testing, we used **FastAPI's TestClient** together with **pytest** to verify the functionality of our endpoints, including root connectivity, health check status, and prediction logic for both valid and invalid inputs. For load testing, we used **Locust** to simulate concurrent users making requests to our deployed service. The load testing results showed that the API successfully handled an aggregate of **6 requests per second (RPS)** with **zero failures**. For the core `/predict` endpoint, the median response time was **150ms** and the 95th percentile was **380ms**, confirming that our serverless deployment on Cloud Run remains stable and responsive under concurrent traffic.![Locust Load Test](figures/q25_locust_results.png)
+
+For unit testing, we used **FastAPI's TestClient** together with **pytest** to verify the functionality of our endpoints, including root connectivity, health check status, and prediction logic for both valid and invalid inputs. For load testing, we used **Locust** to simulate concurrent users making requests to our deployed service. The load testing results showed that the API successfully handled an aggregate of **6 requests per second (RPS)** with **zero failures**. For the core `/predict` endpoint, the median response time was **150ms** and the 95th percentile was **380ms**, confirming that our serverless deployment on Cloud Run remains stable and responsive under concurrent traffic. ![Locust Load Test](figures/q25_locust_results.png)
 
 ### Question 26
 
@@ -584,9 +585,10 @@ Beyond the standard requirements, we implemented a hierarchical model loading st
 >
 > *The starting point of the diagram is our local setup, where we integrated ... and ... and ... into our code.*
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
->
+
 > Answer:
---- question 29 fill here ---
+
+![Cloud Run Monitoring Dashboard](figures/q29_workflow.png)
 (https://github.com/Yayi0117/stock-news-sentiment-mlops)
 
 ### Question 30
