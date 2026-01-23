@@ -121,7 +121,6 @@ app = FastAPI(
 @app.get("/")
 async def root():
     """Root endpoint for basic connectivity check."""
-
     return {
         "message": "Welcome to the Stock News Sentiment API",
         "docs_url": "/docs",
@@ -136,7 +135,6 @@ async def health():
     This endpoint returns 200 even when the model is not loaded yet. Use `/ready`
     for a strict readiness check.
     """
-
     return {
         "status": "ok",
         "model_loaded": bool(ml_models.get("model") and ml_models.get("tokenizer")),
@@ -148,7 +146,6 @@ async def health():
 @app.get("/ready")
 async def ready():
     """Readiness endpoint (requires a loaded model)."""
-
     if not ml_models.get("model") or not ml_models.get("tokenizer"):
         raise HTTPException(status_code=HTTPStatus.SERVICE_UNAVAILABLE, detail="Model not ready")
     return {"status": "ready"}
@@ -157,7 +154,6 @@ async def ready():
 @app.post("/predict", response_model=PredictResponse)
 async def predict(request: PredictRequest):
     """Predict sentiment for a single input text."""
-
     try:
         ensure_model_loaded()
         tokenizer: PreTrainedTokenizerBase = ml_models["tokenizer"]
@@ -170,7 +166,8 @@ async def predict(request: PredictRequest):
 
         with torch.no_grad():
             outputs = model(**inputs)
-            probs = torch.nn.functional.softmax(outputs.logits, dim=-1)[0]
+            logits = outputs.logits
+            probs = torch.nn.functional.softmax(logits, dim=-1)[0]
 
         top_score, top_label_id = torch.max(probs, dim=-1)
         top_label_id = int(top_label_id.item())
